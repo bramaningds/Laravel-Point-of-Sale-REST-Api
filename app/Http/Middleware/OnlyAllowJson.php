@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class OnlyAllowJson
 {
+
     /**
      * Handle an incoming request.
      *
@@ -15,11 +16,19 @@ class OnlyAllowJson
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->isMethod('post')) {
-            abort_if(! $request->isJson(), 406, 'Not acceptable');
-        }
-        elseif ($request->isMethod('put')) {
-            abort_if(! $request->isJson(), 406, 'Not acceptable');
+        if ($request->isMethod('get')) {
+            // abort_if(!$request->wantsJson(), 406);
+        } elseif ($request->isMethod('post')) {
+            // abort_if(!$request->wantsJson(), 406);
+            abort_if(!$request->isJson(), 406);
+        } elseif ($request->isMethod('put')) {
+            // abort_if(!$request->wantsJson());
+            abort_if(!$request->isJson());
+        } elseif ($request->isMethod('patch')) {
+            // abort_if(!$request->wantsJson());
+            abort_if(!$request->isJson());
+        } elseif ($request->isMethod('delete')) {
+            //
         }
 
         return $next($request);
