@@ -19,6 +19,18 @@ This project intend to show REST API implementation using Laravel 10.x. We pick 
 
 Only using laravel framework with its features.
 
+## Features
+
+Several laravel feature implementations:
+* Database structure, we design simple database structure, it might be not strictly normal, but we believe its enough to production requirements.
+* All database record has been covered by migration, simply run migration.
+* Middlewares, only accept json request and content
+* Validation by using form request, with validation input preparation (in sales and purchase route) and passes validation input manipulation.
+* Rules, we add some rules to check product availability to sell and/or purchase
+* We made controller as simple as possible, with only responsible to interact with database and return resource
+* All controller must return (related, if needed) json resource
+* Model relationship, we cover relationships as much and as standard as possible, including many-to-many with pivot (in sale and purchase item models)
+
 ## Roadmap
 
 See the [open issues](https://github.com/bramaningds/Laravel-Point-of-Sale-REST-Api/issues) for a list of proposed features (and known issues).
