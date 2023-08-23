@@ -9,7 +9,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Http\Resources\CustomerResource;
-use App\Models\Customer;
 use App\Repositories\CustomerRepository;
 
 class CustomerController extends Controller
