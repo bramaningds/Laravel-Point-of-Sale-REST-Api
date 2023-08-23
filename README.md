@@ -1,12 +1,9 @@
-<br/>
 <p align="center">
+  <br/>
   <h3 align="center">Point of Sale REST-API</h3>
-
-  <p align="center">
-    A laravel based Point of Sale Rest API
-    <br/>
-    <br/>
-  </p>
+  <p align="center">A laravel based Point of Sale Rest API</p>
+  <br/>
+  <br/>
 </p>
 
 

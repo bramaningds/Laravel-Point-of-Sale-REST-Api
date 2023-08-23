@@ -26,7 +26,7 @@ class SaleController extends Controller
     public function index(Request $request)
     {
         // Make sales query object
-        $query = Sale::query();
+        $query = Sale::with('user', 'customer', 'items');
 
         // Search sales in user, customer, or product
         if ($request->filled('keyword')) {
