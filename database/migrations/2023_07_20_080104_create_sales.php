@@ -16,7 +16,8 @@ return new class extends Migration
             $table->unsignedinteger('user_id');
             $table->unsignedinteger('customer_id');
             $table->timestamps();
-            $table->index(['user_id', 'customer_id', 'created_at']);
+            $table->softDeletes();
+            $table->index(['user_id', 'customer_id', 'created_at', 'deleted_at']);
         });
     }
 

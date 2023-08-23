@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ProductFactory extends Factory
 {
+
+    protected $yn = ['Y', 'Y', 'Y', 'Y', 'Y', 'N'];
+
     /**
      * Define the model's default state.
      *
@@ -20,6 +23,9 @@ class ProductFactory extends Factory
             'name' => fake()->unique()->words(fake()->numberBetween(2, 10), true),
             'description' => fake()->text(100),
             'price' => 500 * fake()->numberBetween(10, 50),
+            'stock' => 200,
+            'sellable' => $this->yn[rand(0, count($this->yn)-1)],
+            'purchasable' => $this->yn[rand(0, count($this->yn)-1)],
         ];
     }
 }

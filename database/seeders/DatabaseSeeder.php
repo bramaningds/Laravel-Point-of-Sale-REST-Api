@@ -45,15 +45,7 @@ class DatabaseSeeder extends Seeder
         $suppliers = Supplier::factory()->count($this->supplierCount)->create();
 
         // create products
-        $products = Product::factory()->count($this->productCount)->sequence(function() {
-            $options = ['Y', 'Y', 'Y', 'Y', 'Y', 'N'];
-
-            $stock = 200;
-            $sellable = $options[rand(0, count($options)-1)];
-            $purchasable = $options[rand(0, count($options)-1)];
-
-            return compact('stock', 'sellable', 'purchasable');
-        })->create();
+        $products = Product::factory()->count($this->productCount)->create();
 
         // create sales
         $sales = Sale::factory()->count($this->saleCount)->sequence(function($sequence) use ($users, $customers) {
@@ -72,7 +64,7 @@ class DatabaseSeeder extends Seeder
             $count = $options[rand(0, count($options)-1)];
 
             try {
-                $sale_items_partial = SaleItem::factory()->count($count)->sequence(function($sequence) use ($sale, $products) {
+                $sale_item = SaleItem::factory()->count($count)->sequence(function($sequence) use ($sale, $products) {
                     $product = $products->random();
 
                     return [
@@ -85,7 +77,7 @@ class DatabaseSeeder extends Seeder
 
                 })->create();
 
-                return $sale_items->merge($sale_items_partial);
+                return $sale_items->merge($sale_item);
 
             } catch (\Exception $e) {
 

@@ -20,6 +20,7 @@ class SaleItemFactory extends Factory
     {
         return [
             'quantity' => fake()->numberBetween(1, 5),
+            'price' => 500 * fake()->numberBetween(10, 50),
         ];
     }
 }
