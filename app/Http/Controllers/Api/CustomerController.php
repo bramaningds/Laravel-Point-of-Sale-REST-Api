@@ -10,24 +10,22 @@ use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
+use App\Repositories\CustomerRepository;
 
 class CustomerController extends Controller
 {
+    public function __construct(CustomerRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $query = Customer::with('last_order');
+        $customers = $this->repository->browse($request);
 
-        if ($request->filled('keyword')) {
-            $query->search($request->input('keyword'));
-        }
-
-        $customers = $query->paginate();
-
-        // return \DB::getQueryLog();
-        // return $customers;
         return CustomerResource::collection($customers);
     }
 
@@ -36,14 +34,7 @@ class CustomerController extends Controller
      */
     public function store(StoreCustomerRequest $request)
     {
-        $customer = new Customer;
-
-        $customer->name = $request->input('name');
-        $customer->phone = $request->input('phone');
-        $customer->email = $request->input('email');
-        $customer->address = $request->input('address');
-
-        $customer->save();
+        $customer = $this->repository->store($request);
 
         return CustomerResource::make($customer);
     }
@@ -53,8 +44,7 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
-        // Find the customer
-        $customer = Customer::findOrFail($id);
+        $customer = $this->repository->show($id);
 
         return CustomerResource::make($customer);
     }
@@ -64,15 +54,7 @@ class CustomerController extends Controller
      */
     public function update(UpdateCustomerRequest $request, $id)
     {
-        // Find the customer
-        $customer = Customer::findOrFail($id);
-
-        $customer->name = $request->input('name');
-        $customer->phone = $request->input('phone');
-        $customer->email = $request->input('email');
-        $customer->address = $request->input('address');
-
-        $customer->save();
+        $customer = $this->repository->update($id, $request);
 
         return CustomerResource::make($customer);
     }
@@ -82,10 +64,7 @@ class CustomerController extends Controller
      */
     public function destroy($id)
     {
-        // Find the customer
-        $customer = Customer::findOrFail($id);
-
-        $customer->delete();
+        $this->repository->destroy($id);
 
         return response(202);
     }

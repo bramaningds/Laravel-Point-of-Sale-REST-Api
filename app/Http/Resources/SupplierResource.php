@@ -21,7 +21,7 @@ class SupplierResource extends JsonResource
             'phone' => $this->phone,
             'email' => $this->email,
             'address' => $this->address,
-            'last_order' => SaleResource::make($this->whenHas('last_order')),
+            'last_order' => SaleResource::make($this->whenLoaded('last_order')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

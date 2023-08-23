@@ -26,7 +26,7 @@ class PurchaseController extends Controller
     public function index(Request $request)
     {
         // Make purchases query object
-        $query = Purchase::query();
+        $query = Purchase::with('user', 'supplier', 'items');
 
         // Search purchases in user, supplier, or product
         if ($request->filled('keyword')) {
@@ -97,7 +97,7 @@ class PurchaseController extends Controller
             $purchase->items()->attach($request->input('items'));
             // Decrement product items stock
             $purchase->items->each(function($product) {
-                $product->increment('stock', $product->pivot->quantity);
+                $product->decrement('stock', $product->pivot->quantity);
             });
 
             // Commit database
@@ -198,7 +198,7 @@ class PurchaseController extends Controller
 
             // Increment the stock used
             $purchase->items->each(function($product) {
-                $product->decrement('stock', $product->pivot->quantity);
+                $product->increment('stock', $product->pivot->quantity);
             });
             // Remove the purchase record
             $purchase->delete();

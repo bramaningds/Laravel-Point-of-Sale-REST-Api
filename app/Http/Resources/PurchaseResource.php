@@ -17,9 +17,9 @@ class PurchaseResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'user' => UserResource::make($this->user),
-            'supplier' => SupplierResource::make($this->supplier),
-            'items' => ItemResource::collection($this->items),
+            'user' => UserResource::make($this->whenLoaded('user')),
+            'supplier' => SupplierResource::make($this->whenLoaded('supplier')),
+            'items' => ItemResource::collection($this->whenLoaded('items')),
             'total' => $this->total,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at
