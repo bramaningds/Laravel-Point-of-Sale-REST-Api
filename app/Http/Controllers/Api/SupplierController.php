@@ -9,25 +9,23 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSupplierRequest;
 use App\Http\Requests\UpdateSupplierRequest;
 use App\Http\Resources\SupplierResource;
-use App\Models\Supplier;
+use App\Repositories\SupplierRepository;
 
 class SupplierController extends Controller
 {
+
+    public function __construct(SupplierRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $query = Supplier::with('last_order');
+        $suppliers = $this->repository->browse($request);
 
-        if ($request->filled('keyword')) {
-            $query->search($request->input('keyword'));
-        }
-
-        $suppliers = $query->paginate();
-
-        // return \DB::getQueryLog();
-        // return $suppliers;
         return SupplierResource::collection($suppliers);
     }
 
@@ -36,14 +34,7 @@ class SupplierController extends Controller
      */
     public function store(StoreSupplierRequest $request)
     {
-        $supplier = new Supplier;
-
-        $supplier->name = $request->input('name');
-        $supplier->phone = $request->input('phone');
-        $supplier->email = $request->input('email');
-        $supplier->address = $request->input('address');
-
-        $supplier->save();
+        $supplier = $this->repository->store($request);
 
         return SupplierResource::make($supplier);
     }
@@ -53,8 +44,7 @@ class SupplierController extends Controller
      */
     public function show($id)
     {
-        // Find the supplier
-        $supplier = Supplier::findOrFail($id);
+        $supplier = $this->repository->show($id);
 
         return SupplierResource::make($supplier);
     }
@@ -64,15 +54,7 @@ class SupplierController extends Controller
      */
     public function update(UpdateSupplierRequest $request, $id)
     {
-        // Find the supplier
-        $supplier = Supplier::findOrFail($id);
-
-        $supplier->name = $request->input('name');
-        $supplier->phone = $request->input('phone');
-        $supplier->email = $request->input('email');
-        $supplier->address = $request->input('address');
-
-        $supplier->save();
+        $supplier = $this->repository->update($id, $request);
 
         return SupplierResource::make($supplier);
     }
@@ -82,10 +64,7 @@ class SupplierController extends Controller
      */
     public function destroy($id)
     {
-        // Find the supplier
-        $supplier = Supplier::findOrFail($id);
-
-        $supplier->delete();
+        $this->repository->destroy($id);
 
         return response(202);
     }

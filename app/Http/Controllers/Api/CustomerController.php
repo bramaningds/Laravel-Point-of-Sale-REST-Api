@@ -13,6 +13,7 @@ use App\Repositories\CustomerRepository;
 
 class CustomerController extends Controller
 {
+
     public function __construct(CustomerRepository $repository)
     {
         $this->repository = $repository;
