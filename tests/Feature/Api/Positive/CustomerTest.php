@@ -99,7 +99,7 @@ class CustomerTest extends TestCase
 
         $response = $this->delete("/api/customer/{$customer->id}");
 
-        $response->assertStatus(200);
+        $response->assertSuccessful();
 
         $this->assertSoftDeleted($customer);
 

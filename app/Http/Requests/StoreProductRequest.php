@@ -11,7 +11,7 @@ class StoreProductRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,23 @@ class StoreProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => 'required|string',
+            'description' => 'string',
+            'price' => 'required|numeric',
+            'sellable' => 'in:Y,N',
+            'purchasable' => 'in:Y,N',
         ];
+    }
+
+    /**
+     * Handle a passed validation attempt.
+     */
+    protected function passedValidation(): void
+    {
+        $this->merge([
+            'stock' => 0,
+            'sellable' => $this->sellable ?? 'Y',
+            'purchasable' => $this->purchasable ?? 'Y'
+        ]);
     }
 }

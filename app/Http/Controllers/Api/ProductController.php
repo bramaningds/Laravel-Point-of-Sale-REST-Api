@@ -9,24 +9,23 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
-use App\Models\Product;
+use App\Repositories\ProductRepository;
 
 class ProductController extends Controller
 {
+
+    public function __construct(ProductRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $query = Product::query();
+        $products = $this->repository->browse($request);
 
-        if ($request->filled('keyword')) {
-            $query->search($request->input('keyword'));
-        }
-
-        $products = $query->paginate();
-
-        // return \DB::getQueryLog();
         return ProductResource::collection($products);
     }
 
@@ -35,15 +34,7 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
-        $product = new Product;
-
-        $product->name = $request->input('name');
-        $product->description = $request->input('description');
-        $product->price = $request->input('price');
-        $product->last_sold_at = null;
-        $product->active = $request->input('active');
-
-        $product->save();
+        $product = $this->repository->store($request);
 
         return ProductResource::make($product);
     }
@@ -53,8 +44,7 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        // Find the product
-        $product = Product::findOrFail($id);
+        $product = $this->repository->show($id);
 
         return ProductResource::make($product);
     }
@@ -62,21 +52,11 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProductRequest $request, $idproduct)
+    public function update(UpdateProductRequest $request, $id)
     {
-        // Find the product
-        $product = Product::findOrFail($id);
-
-        $product->name = $request->input('name');
-        $product->description = $request->input('description');
-        $product->price = $request->input('price');
-        $product->last_sold_at = null;
-        $product->active = $request->input('active');
-
-        $product->save();
+        $product = $this->repository->update($id, $request);
 
         return ProductResource::make($product);
-
     }
 
     /**
@@ -84,11 +64,8 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        // Find the product
-        $product = Product::findOrFail($id);
+        $this->repository->destroy($id);
 
-        $product->delete();
-
-        return response(202);
+        return response('', 204);
     }
 }

@@ -66,6 +66,6 @@ class CustomerController extends Controller
     {
         $this->repository->destroy($id);
 
-        return response(202);
+        return response('', 204);
     }
 }

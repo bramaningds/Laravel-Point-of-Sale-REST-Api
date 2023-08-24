@@ -80,6 +80,8 @@ class StorePurchaseRequest extends FormRequest
             'supplier.address' => 'string',
             'items' => 'required',
             'items.*' => new Purchasable,
+            'items.*.quantity' => 'required|numeric',
+            'items.*.price' => 'numeric',
         ];
     }
 

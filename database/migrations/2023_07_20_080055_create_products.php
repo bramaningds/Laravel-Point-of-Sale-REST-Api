@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name', 100)->unique();
             $table->text('description')->nullable();
             $table->unsignedDecimal('price', 8, 2);
-            $table->unsignedDecimal('stock', 8, 2)->nullable();
+            $table->unsignedDecimal('stock', 8, 2);
             $table->enum('sellable', ['Y', 'N']);
             $table->enum('purchasable', ['Y', 'N']);
             $table->timestamps();

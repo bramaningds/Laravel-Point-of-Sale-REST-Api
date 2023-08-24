@@ -18,10 +18,6 @@ class Sale extends Model
         'user_id', 'customer_id'
     ];
 
-    protected $with = [
-        // 'user', 'customer', 'items'
-    ];
-
     public function customer() : BelongsTo {
         return $this->belongsTo(Customer::class);
     }

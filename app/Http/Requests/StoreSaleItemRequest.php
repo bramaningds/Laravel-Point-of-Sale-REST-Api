@@ -23,8 +23,8 @@ class StoreSaleItemRequest extends FormRequest
     {
         return [
             'product_id' => 'required|numeric|integer',
-            'quantity' => 'required|numeric|decimal:0,2',
-            'price' => 'numeric|decimal:0,2',
+            'quantity' => 'required|numeric',
+            'price' => 'numeric',
         ];
     }
 }

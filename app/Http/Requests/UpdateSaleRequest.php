@@ -28,9 +28,6 @@ class UpdateSaleRequest extends FormRequest
             'customer.phone' => 'string',
             'customer.email' => 'string',
             'customer.address' => 'string',
-            'items.*.product_id' => 'numeric|integer',
-            'items.*.quantity' => 'numeric',
-            'items.*.price' => 'numeric',
         ];
     }
 }

@@ -6,9 +6,9 @@ use Tests\TestCase;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-use App\Models\Supplier;
+use App\Models\Product;
 
-class SupplierTest extends TestCase
+class ProductTest extends TestCase
 {
     use RefreshDatabase;
     /**
@@ -16,7 +16,7 @@ class SupplierTest extends TestCase
      */
     public function test_index(): void
     {
-        $response = $this->get('/api/supplier');
+        $response = $this->get('/api/product');
 
         $response->assertStatus(200);
         $response->assertJson(function ($json) {
@@ -27,23 +27,22 @@ class SupplierTest extends TestCase
 
     public function test_search(): void
     {
-        $supplier = Supplier::factory()->sequence(fn() => ['name' => 'bram'])->create();
+        $product = Product::factory()->sequence(fn() => ['name' => 'bram'])->create();
 
-        $response = $this->get('/api/supplier?keyword=bram');
+        $response = $this->get('/api/product?keyword=bram');
 
         $response->assertStatus(200);
         $response->assertJson(function ($json) {
             $json->hasAll(['meta', 'data', 'links']);
             $json->has('data', 1);
         });
-
-        $supplier->forceDelete();
     }
 
     public function test_store(): void
     {
-        $response = $this->postJson('/api/supplier', [
+        $response = $this->postJson('/api/product', [
             'name' => 'bram',
+            'price' => 10000,
         ]);
 
         $response->assertStatus(201);
@@ -53,60 +52,50 @@ class SupplierTest extends TestCase
             $json->where('data.name', 'bram');
         });
 
-        $this->assertDatabaseHas('suppliers', ['name' => 'bram']);
-        $this->assertModelExists(Supplier::where('name', 'bram')->first(['id']));
-
-        Supplier::where('name', 'bram')->forceDelete();
+        $this->assertDatabaseHas('products', ['name' => 'bram']);
+        $this->assertModelExists(Product::where('name', 'bram')->first(['id']));
     }
 
     public function test_show(): void
     {
-        $supplier = Supplier::factory()->create();
+        $product = Product::factory()->create();
 
-        $response = $this->get("/api/supplier/{$supplier->id}");
+        $response = $this->get("/api/product/{$product->id}");
 
         $response->assertStatus(200);
-        $response->assertJson(function ($json) use ($supplier) {
+        $response->assertJson(function ($json) use ($product) {
             $json->has('data');
             $json->has('data.id');
-            $json->where('data.id', $supplier->id);
+            $json->where('data.id', $product->id);
         });
-
-        $supplier->forceDelete();
     }
 
     public function test_update(): void
     {
-        $supplier = Supplier::factory()->create();
+        $product = Product::factory()->create();
 
-        $response = $this->putJson("/api/supplier/{$supplier->id}", [
+        $response = $this->putJson("/api/product/{$product->id}", [
             'name' => 'bram',
         ]);
 
         $response->assertStatus(200);
-        $response->assertJson(function ($json) use ($supplier) {
+        $response->assertJson(function ($json) use ($product) {
             $json->has('data');
             $json->has('data.id');
             $json->where('data.name', 'bram');
         });
 
-        $this->assertDatabaseHas('suppliers', ['name' => 'bram']);
-
-        $supplier->forceDelete();
+        $this->assertDatabaseHas('products', ['name' => 'bram']);
     }
 
     public function test_delete(): void
     {
-        $supplier = Supplier::factory()->create();
+        $product = Product::factory()->create();
 
-        $response = $this->delete("/api/supplier/{$supplier->id}");
+        $response = $this->delete("/api/product/{$product->id}");
 
         $response->assertSuccessful();
 
-        $this->assertSoftDeleted($supplier);
-
-        $supplier->forceDelete();
-
-        $this->assertModelMissing($supplier);
+        $this->assertSoftDeleted($product);
     }
 }

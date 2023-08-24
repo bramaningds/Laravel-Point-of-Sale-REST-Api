@@ -8,30 +8,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Purchase extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'user_id', 'supplier_id'
     ];
-
-    protected $with = [
-        'user', 'supplier', 'items'
-    ];
-
-    public function getTotalAttribute() : Float {
-        $items = $this->items->toArray() ?: [];
-
-        $subtotal = array_reduce($items, function($carry, $item) {
-            return $carry + ($item['pivot']['quantity'] * $item['pivot']['price']);
-        }, 0);
-
-        $total = $subtotal;
-
-        return $total;
-    }
 
     public function supplier() : BelongsTo {
         return $this->belongsTo(Supplier::class);
@@ -44,7 +29,20 @@ class Purchase extends Model
     public function items() : BelongsToMany {
         return $this->belongsToMany(Product::class, 'purchase_items')
                     ->using(PurchaseItem::class)
-                    ->withPivot('quantity', 'price');
+                    ->withPivot('quantity', 'price')
+                    ->withTimestamps();
+    }
+
+    public function getTotalAttribute() : Float {
+        $items = $this->items->toArray() ?: [];
+
+        $subtotal = array_reduce($items, function($carry, $item) {
+            return $carry + ($item['pivot']['quantity'] * $item['pivot']['price']);
+        }, 0);
+
+        $total = $subtotal;
+
+        return $total;
     }
 
     public function scopeSearch(Builder $query, string $keyword) {

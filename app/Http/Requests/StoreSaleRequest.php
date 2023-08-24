@@ -81,6 +81,8 @@ class StoreSaleRequest extends FormRequest
             'customer.address' => 'string',
             'items' => 'required',
             'items.*' => [new Sellable, new SufficientStock],
+            'items.*.quantity' => 'required|numeric',
+            'items.*.price' => 'numeric',
         ];
     }
 
