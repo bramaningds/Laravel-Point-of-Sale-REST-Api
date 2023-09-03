@@ -9,9 +9,7 @@ use Tests\TestCase;
 class CustomerTest extends TestCase
 {
     use RefreshDatabase;
-    /**
-     * A basic feature test example.
-     */
+
     public function test_index(): void
     {
         $response = $this->get('/api/customer');

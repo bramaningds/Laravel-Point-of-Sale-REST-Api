@@ -1,21 +1,23 @@
 <?php
 
-namespace App\Repositories;
-
-use Exception;
+namespace App\Http\Controllers\Base;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-use App\Models\Supplier;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreSupplierRequest;
+use App\Http\Requests\UpdateSupplierRequest;
+use App\Http\Resources\SupplierResource;
+use App\Repositories\SupplierRepository;
 
-class SupplierRepository extends Repository
+class SupplierController extends Controller
 {
 
     /**
      * Display a listing of the resource.
      */
-    public function browse(Request $request)
+    public function index(Request $request)
     {
         $query = Supplier::with('last_order', 'last_order.user', 'last_order.items');
 
@@ -31,7 +33,7 @@ class SupplierRepository extends Repository
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreSupplierRequest $request)
     {
         $supplier = new Supplier;
 
@@ -58,14 +60,14 @@ class SupplierRepository extends Repository
     /**
      * Update the specified resource in storage.
      */
-    public function update($id, Request $request)
+    public function update(UpdateSupplierRequest $request, $id)
     {
         $supplier = Supplier::findOrFail($id);
 
-        $supplier->name = $request->input('name');
-        $supplier->phone = $request->input('phone');
-        $supplier->email = $request->input('email');
-        $supplier->address = $request->input('address');
+        $supplier->name = $request->input('name', $supplier->name);
+        $supplier->phone = $request->input('phone', $supplier->phone);
+        $supplier->email = $request->input('email', $supplier->email);
+        $supplier->address = $request->input('address', $supplier->address);
 
         $supplier->save();
 

@@ -3,30 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Base\SaleController as BaseSaleController;
 use App\Http\Requests\StoreSaleRequest;
 use App\Http\Requests\UpdateSaleRequest;
 use App\Http\Resources\SaleResource;
-use App\Repositories\SaleRepository;
 
-class SaleController extends Controller
+class SaleController extends BaseSaleController
 {
-
-    public function __construct(SaleRepository $repository)
-    {
-        $this->repository = $repository;
-    }
 
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $sales = $this->repository->browse($request);
-
-        return SaleResource::collection($sales);
+        return SaleResource::collection(parent::index($request));
     }
 
     /**
@@ -34,9 +25,7 @@ class SaleController extends Controller
      */
     public function store(StoreSaleRequest $request)
     {
-        $sale = $this->repository->store($request);
-
-        return SaleResource::make($sale);
+        return SaleResource::make(parent::store($request));
     }
 
     /**
@@ -44,9 +33,7 @@ class SaleController extends Controller
      */
     public function show($id)
     {
-        $sale = $this->repository->show($id);
-
-        return SaleResource::make($sale);
+        return SaleResource::make(parent::show($id));
     }
 
     /**
@@ -54,9 +41,7 @@ class SaleController extends Controller
      */
     public function update(UpdateSaleRequest $request, $id)
     {
-        $sale = $this->repository->update($id, $request);
-
-        return SaleResource::make($sale);
+        return SaleResource::make(parent::update($request, $id));
     }
 
     /**
@@ -64,8 +49,6 @@ class SaleController extends Controller
      */
     public function destroy($id)
     {
-        $this->repository->destroy($id);
-
-        return response('', 204);
+        return parent::destroy($id) ? response('', 204) : response('', 500);
     }
 }

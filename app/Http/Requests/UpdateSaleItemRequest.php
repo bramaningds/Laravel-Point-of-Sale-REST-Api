@@ -22,8 +22,8 @@ class UpdateSaleItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'quantity' => 'required|numeric|decimal:0,2',
-            'price' => 'numeric|decimal:0,2',
+            'quantity' => 'required|numeric',
+            'price' => 'numeric',
         ];
     }
 }

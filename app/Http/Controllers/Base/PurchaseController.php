@@ -1,26 +1,27 @@
 <?php
 
-namespace App\Repositories;
-
-use Exception;
+namespace App\Http\Controllers\Base;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StorePurchaseRequest;
+use App\Http\Requests\UpdatePurchaseRequest;
+use App\Http\Resources\PurchaseResource;
+use App\Models\Purchase;
+use App\Models\User;
 use App\Models\Supplier;
 use App\Models\Product;
-use App\Models\Purchase;
-use App\Models\PurchaseItem;
-use App\Models\User;
 
-class PurchaseRepository extends Repository
+class PurchaseController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      */
-    public function browse(Request $request)
+    public function index(Request $request)
     {
-        // Make purchases query object
         $query = Purchase::with('user', 'supplier', 'items');
 
         // Search purchases in user, supplier, or product
@@ -59,7 +60,7 @@ class PurchaseRepository extends Repository
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StorePurchaseRequest $request)
     {
         try {
             // Begin transaction
@@ -80,6 +81,25 @@ class PurchaseRepository extends Repository
                     'address' => $request->input('supplier.address'),
                 ]);
 
+            // Makes array of items in order to be attached to purchase record
+            $items = array_reduce($request->input('items'), function($items, $item) {
+                // Find the product
+                $product = Product::findOrFail($item['id']);
+                // Throw if product is not sellable
+                if ($product->isNotSellable()) throw new ProductIsNotSellableException($product);
+                // Throw if product has insufficient required stock
+                if ($product->hasInsufficientStock($item['quantity'])) throw new ProductHasInsufficientStock($product, $item['quantity']);
+                // Decrement product items stock
+                $product->decrement('stock', $item['quantity']);
+                // Set the item as in forms of attaching item requirement
+                $items[$product->id] = [
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'] ?? $product->price
+                ];
+
+                return $items;
+            }, []);
+
             // Create new purchase
             $purchase = new Purchase;
             // Set the user
@@ -89,17 +109,13 @@ class PurchaseRepository extends Repository
             // Save the purchase
             $purchase->save();
             // Set the purchase items
-            $purchase->items()->attach($request->input('items'));
-            // Decrement product items stock
-            $purchase->items->each(function($product) {
-                $product->decrement('stock', $product->pivot->quantity);
-            });
+            $purchase->items()->attach($items);
 
             // Commit database
             DB::commit();
 
             // return DB::getQueryLog();
-            return $purchase;
+            return $purchase->load('items');
 
         } catch (Exception $e) {
             // Rollback transaction
@@ -123,7 +139,7 @@ class PurchaseRepository extends Repository
     /**
      * Update the specified resource in storage.
      */
-    public function update($id, Request $request)
+    public function update(UpdatePurchaseRequest $request, $id)
     {
         // Find the purchase
         $purchase = Purchase::findOrFail($id);
@@ -186,7 +202,7 @@ class PurchaseRepository extends Repository
     {
         try {
              // Find the purchase
-            $purchase = Purchase::with('items')->findOrFail($id);
+            $purchase = Purchase::with('items')->findOrFail($id, ['id']);
 
              // Begin transaction
             DB::beginTransaction();

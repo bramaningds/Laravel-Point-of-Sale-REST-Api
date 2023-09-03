@@ -60,7 +60,7 @@ class DatabaseSeeder extends Seeder
             $sale_items = $sale_items ?? collect([]);
 
             // items count, most count are 1,2,3 and the rest
-            $options = [1,1,2,2,2,3,3,4,5,6,7];
+            $options = [1,2,2,2,3,3,4,5,6,7];
             $count = $options[rand(0, count($options)-1)];
 
             try {

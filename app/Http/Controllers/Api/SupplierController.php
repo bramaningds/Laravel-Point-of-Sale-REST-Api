@@ -3,30 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Base\SupplierController as BaseSupplierController;
 use App\Http\Requests\StoreSupplierRequest;
 use App\Http\Requests\UpdateSupplierRequest;
 use App\Http\Resources\SupplierResource;
-use App\Repositories\SupplierRepository;
 
-class SupplierController extends Controller
+class SupplierController extends BaseSupplierController
 {
-
-    public function __construct(SupplierRepository $repository)
-    {
-        $this->repository = $repository;
-    }
 
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $suppliers = $this->repository->browse($request);
-
-        return SupplierResource::collection($suppliers);
+        return SupplierResource::collection(parent::index($request));
     }
 
     /**
@@ -34,9 +25,7 @@ class SupplierController extends Controller
      */
     public function store(StoreSupplierRequest $request)
     {
-        $supplier = $this->repository->store($request);
-
-        return SupplierResource::make($supplier);
+        return SupplierResource::make(parent::store($request));
     }
 
     /**
@@ -44,9 +33,7 @@ class SupplierController extends Controller
      */
     public function show($id)
     {
-        $supplier = $this->repository->show($id);
-
-        return SupplierResource::make($supplier);
+        return SupplierResource::make(parent::show($id));
     }
 
     /**
@@ -54,9 +41,7 @@ class SupplierController extends Controller
      */
     public function update(UpdateSupplierRequest $request, $id)
     {
-        $supplier = $this->repository->update($id, $request);
-
-        return SupplierResource::make($supplier);
+        return SupplierResource::make(parent::update($request, $id));
     }
 
     /**
@@ -64,8 +49,6 @@ class SupplierController extends Controller
      */
     public function destroy($id)
     {
-        $this->repository->destroy($id);
-
-        return response('', 204);
+        return parent::destroy($id) ? response('', 204) : response('', 500);
     }
 }

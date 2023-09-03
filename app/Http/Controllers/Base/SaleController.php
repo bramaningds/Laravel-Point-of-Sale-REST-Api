@@ -1,26 +1,27 @@
 <?php
 
-namespace App\Repositories;
-
-use Exception;
+namespace App\Http\Controllers\Base;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreSaleRequest;
+use App\Http\Requests\UpdateSaleRequest;
+use App\Http\Resources\SaleResource;
+use App\Models\Sale;
+use App\Models\User;
 use App\Models\Customer;
 use App\Models\Product;
-use App\Models\Sale;
-use App\Models\SaleItem;
-use App\Models\User;
 
-class SaleRepository extends Repository
+class SaleController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      */
-    public function browse(Request $request)
+    public function index(Request $request)
     {
-        // Make sales query object
         $query = Sale::with('user', 'customer', 'items');
 
         // Search sales in user, customer, or product
@@ -59,7 +60,7 @@ class SaleRepository extends Repository
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreSaleRequest $request)
     {
         try {
             // Begin transaction
@@ -80,6 +81,25 @@ class SaleRepository extends Repository
                     'address' => $request->input('customer.address'),
                 ]);
 
+            // Makes array of items in order to be attached to sale record
+            $items = array_reduce($request->input('items'), function($items, $item) {
+                // Find the product
+                $product = Product::findOrFail($item['id']);
+                // Throw if product is not sellable
+                if ($product->isNotSellable()) throw new ProductIsNotSellableException($product);
+                // Throw if product has insufficient required stock
+                if ($product->hasInsufficientStock($item['quantity'])) throw new ProductHasInsufficientStock($product, $item['quantity']);
+                // Decrement product items stock
+                $product->decrement('stock', $item['quantity']);
+                // Set the item as in forms of attaching item requirement
+                $items[$product->id] = [
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'] ?? $product->price
+                ];
+
+                return $items;
+            }, []);
+
             // Create new sale
             $sale = new Sale;
             // Set the user
@@ -89,17 +109,13 @@ class SaleRepository extends Repository
             // Save the sale
             $sale->save();
             // Set the sale items
-            $sale->items()->attach($request->input('items'));
-            // Decrement product items stock
-            $sale->items->each(function($product) {
-                $product->decrement('stock', $product->pivot->quantity);
-            });
+            $sale->items()->attach($items);
 
             // Commit database
             DB::commit();
 
             // return DB::getQueryLog();
-            return $sale;
+            return $sale->load('items');
 
         } catch (Exception $e) {
             // Rollback transaction
@@ -123,7 +139,7 @@ class SaleRepository extends Repository
     /**
      * Update the specified resource in storage.
      */
-    public function update($id, Request $request)
+    public function update(UpdateSaleRequest $request, $id)
     {
         // Find the sale
         $sale = Sale::findOrFail($id);

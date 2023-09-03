@@ -1,21 +1,23 @@
 <?php
 
-namespace App\Repositories;
-
-use Exception;
+namespace App\Http\Controllers\Base;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreCustomerRequest;
+use App\Http\Requests\UpdateCustomerRequest;
+use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
 
-class CustomerRepository extends Repository
+class CustomerController extends Controller
 {
 
     /**
      * Display a listing of the resource.
      */
-    public function browse(Request $request)
+    public function index(Request $request)
     {
         $query = Customer::with('last_order', 'last_order.user', 'last_order.items');
 
@@ -31,7 +33,7 @@ class CustomerRepository extends Repository
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreCustomerRequest $request)
     {
         $customer = new Customer;
 
@@ -58,14 +60,14 @@ class CustomerRepository extends Repository
     /**
      * Update the specified resource in storage.
      */
-    public function update($id, Request $request)
+    public function update(UpdateCustomerRequest $request, $id)
     {
         $customer = Customer::findOrFail($id);
 
-        $customer->name = $request->input('name');
-        $customer->phone = $request->input('phone');
-        $customer->email = $request->input('email');
-        $customer->address = $request->input('address');
+        $customer->name = $request->input('name', $customer->name);
+        $customer->phone = $request->input('phone', $customer->phone);
+        $customer->email = $request->input('email', $customer->email);
+        $customer->address = $request->input('address', $customer->address);
 
         $customer->save();
 

@@ -3,30 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Base\ProductController as BaseProductController;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
-use App\Repositories\ProductRepository;
 
-class ProductController extends Controller
+class ProductController extends BaseProductController
 {
-
-    public function __construct(ProductRepository $repository)
-    {
-        $this->repository = $repository;
-    }
 
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $products = $this->repository->browse($request);
-
-        return ProductResource::collection($products);
+        return ProductResource::collection(parent::index($request));
     }
 
     /**
@@ -34,9 +25,7 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
-        $product = $this->repository->store($request);
-
-        return ProductResource::make($product);
+        return ProductResource::make(parent::store($request));
     }
 
     /**
@@ -44,9 +33,7 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = $this->repository->show($id);
-
-        return ProductResource::make($product);
+        return ProductResource::make(parent::show($id));
     }
 
     /**
@@ -54,9 +41,7 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, $id)
     {
-        $product = $this->repository->update($id, $request);
-
-        return ProductResource::make($product);
+        return ProductResource::make(parent::update($request, $id));
     }
 
     /**
@@ -64,8 +49,6 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        $this->repository->destroy($id);
-
-        return response('', 204);
+        return parent::destroy($id) ? response('', 204) : response('', 500);
     }
 }

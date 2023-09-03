@@ -3,30 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Base\CustomerController as BaseCustomerController;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Http\Resources\CustomerResource;
-use App\Repositories\CustomerRepository;
 
-class CustomerController extends Controller
+class CustomerController extends BaseCustomerController
 {
-
-    public function __construct(CustomerRepository $repository)
-    {
-        $this->repository = $repository;
-    }
 
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $customers = $this->repository->browse($request);
-
-        return CustomerResource::collection($customers);
+        return CustomerResource::collection(parent::index($request));
     }
 
     /**
@@ -34,9 +25,7 @@ class CustomerController extends Controller
      */
     public function store(StoreCustomerRequest $request)
     {
-        $customer = $this->repository->store($request);
-
-        return CustomerResource::make($customer);
+        return CustomerResource::make(parent::store($request));
     }
 
     /**
@@ -44,9 +33,7 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
-        $customer = $this->repository->show($id);
-
-        return CustomerResource::make($customer);
+        return CustomerResource::make(parent::show($id));
     }
 
     /**
@@ -54,9 +41,7 @@ class CustomerController extends Controller
      */
     public function update(UpdateCustomerRequest $request, $id)
     {
-        $customer = $this->repository->update($id, $request);
-
-        return CustomerResource::make($customer);
+        return CustomerResource::make(parent::update($request, $id));
     }
 
     /**
@@ -64,8 +49,6 @@ class CustomerController extends Controller
      */
     public function destroy($id)
     {
-        $this->repository->destroy($id);
-
-        return response('', 204);
+        return parent::destroy($id) ? response('', 204) : response('', 500);
     }
 }
