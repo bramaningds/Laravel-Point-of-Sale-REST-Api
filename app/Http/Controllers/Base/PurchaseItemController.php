@@ -37,10 +37,7 @@ class PurchaseItemController extends Controller
         $product = Product::findOrFail($request->input('id'));
 
         // Throw if product is not sellable
-        if ($product->isNotSellable()) throw new ProductIsNotSellableException($product);
-
-        // Throw if product has insufficient required stock
-        if ($product->hasInsufficientStock($request->input('quantity'))) throw new ProductHasInsufficientStock($product, $request->input('quantity'));
+        if ($product->isNotPurchasable()) throw new ProductIsNotSellableException($product);
 
         try {
             // Begin transaction

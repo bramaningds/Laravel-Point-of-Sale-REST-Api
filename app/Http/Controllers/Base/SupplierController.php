@@ -9,7 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSupplierRequest;
 use App\Http\Requests\UpdateSupplierRequest;
 use App\Http\Resources\SupplierResource;
-use App\Repositories\SupplierRepository;
+use App\Models\Supplier;
 
 class SupplierController extends Controller
 {

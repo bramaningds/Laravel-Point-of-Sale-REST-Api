@@ -45,4 +45,15 @@ class Product extends Model
     {
         return ! $this->hasSufficientStock($required);
     }
+
+    public function isPurchasable(): bool
+    {
+        return $this->purchasable == 'Y';
+    }
+
+    public function isNotPurchasable(): bool
+    {
+        return ! $this->isPurchasable();
+    }
+
 }

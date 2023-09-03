@@ -86,9 +86,7 @@ class PurchaseController extends Controller
                 // Find the product
                 $product = Product::findOrFail($item['id']);
                 // Throw if product is not sellable
-                if ($product->isNotSellable()) throw new ProductIsNotSellableException($product);
-                // Throw if product has insufficient required stock
-                if ($product->hasInsufficientStock($item['quantity'])) throw new ProductHasInsufficientStock($product, $item['quantity']);
+                if ($product->isNotPurchasable()) throw new ProductIsNotSellableException($product);
                 // Decrement product items stock
                 $product->decrement('stock', $item['quantity']);
                 // Set the item as in forms of attaching item requirement
