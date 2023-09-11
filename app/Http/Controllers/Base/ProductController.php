@@ -15,7 +15,10 @@ class ProductController extends Controller
 {
 
     /**
-     * Display a listing of the resource.
+     * Paginate the products resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
     public function index(Request $request)
     {
@@ -25,13 +28,16 @@ class ProductController extends Controller
             $query->search($request->input('keyword'));
         }
 
-        $products = $query->paginate();
-
-        return $products;
+        return $query->paginate();
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a new product resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \App\Models\Product
+     *
+     * @throws \Throwable
      */
     public function store(StoreProductRequest $request)
     {
@@ -40,28 +46,37 @@ class ProductController extends Controller
         $product->name = $request->input('name');
         $product->description = $request->input('description');
         $product->price = $request->input('price');
+        $product->category_id = $request->input('category_id');
         $product->stock = 0;
         $product->sellable = $request->input('sellable', 'Y');
         $product->purchasable = $request->input('purchasable', 'Y');
 
-        $product->save();
+        $product->saveOrFail();
 
         return $product;
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified product resource.
+     *
+     * @param  mixed  $id
+     * @return \App\Models\Product
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function show($id)
     {
-        // Find the product
-        $product = Product::findOrFail($id);
-
-        return $product;
+        return Product::findOrFail($id);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the product resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  mixed  $id
+     * @return \App\Models\Product
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException|\Throwable
      */
     public function update(UpdateProductRequest $request, $id)
     {
@@ -74,19 +89,21 @@ class ProductController extends Controller
         $product->sellable = $request->input('sellable', $product->sellable);
         $product->purchasable = $request->input('purchasable', $product->purchasable);
 
-        $product->save();
+        $product->saveOrFail();
 
         return $product;
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Delete the product from the database within a transaction.
+     *
+     * @param  mixed  $id
+     * @return bool|null
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException|\Throwable
      */
     public function destroy($id)
     {
-        // Find the product
-        $product = Product::findOrFail($id);
-
-        return $product->delete();
+        return Product::findOrFail($id, ['id'])->deleteOrFail();
     }
 }

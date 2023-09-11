@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers\Base;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
-use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
+use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
 
     /**
-     * Display a listing of the resource.
+     * Paginate the customer resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
     public function index(Request $request)
     {
@@ -25,13 +25,16 @@ class CustomerController extends Controller
             $query->search($request->input('keyword'));
         }
 
-        $customers = $query->paginate();
-
-        return $customers;
+        return $query->paginate();
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a new customer resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \App\Models\Customer
+     *
+     * @throws \Throwable
      */
     public function store(StoreCustomerRequest $request)
     {
@@ -42,23 +45,32 @@ class CustomerController extends Controller
         $customer->email = $request->input('email');
         $customer->address = $request->input('address');
 
-        $customer->save();
+        $customer->saveOrFail();
 
         return $customer;
     }
 
     /**
-     * Display the specified resource.
+     * Display the customer resource.
+     *
+     * @param  mixed  $id
+     * @return \App\Models\Customer
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function show($id)
     {
-        $customer = Customer::findOrFail($id);
-
-        return $customer;
+        return Customer::findOrFail($id);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the customer resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  mixed  $id
+     * @return \App\Models\Customer
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException|\Throwable
      */
     public function update(UpdateCustomerRequest $request, $id)
     {
@@ -69,18 +81,21 @@ class CustomerController extends Controller
         $customer->email = $request->input('email', $customer->email);
         $customer->address = $request->input('address', $customer->address);
 
-        $customer->save();
+        $customer->saveOrFail();
 
         return $customer;
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Delete the customer from the database within a transaction.
+     *
+     * @param  mixed  $id
+     * @return bool|null
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException|\Throwable
      */
     public function destroy($id)
     {
-        $customer = Customer::findOrFail($id, ['id']);
-
-        return $customer->delete();
+        return Customer::findOrFail($id, ['id'])->deleteOrFail();
     }
 }

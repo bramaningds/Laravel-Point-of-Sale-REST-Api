@@ -16,7 +16,6 @@ use App\Models\Product;
 
 class PurchaseController extends Controller
 {
-
     /**
      * Display a listing of the resource.
      */
@@ -67,12 +66,12 @@ class PurchaseController extends Controller
             DB::beginTransaction();
 
             // Find the user
-            $user = User::findOrFail($request->input('user_id'));
+            $user = User::find($request->input('user_id'));
 
             // Find or create the supplier
             $supplier = $request->filled('supplier_id')
                 // Find supplier or throw exception
-                ? Supplier::findOrFail($request->input('supplier_id'))
+                ? Supplier::find($request->input('supplier_id'))
                 // Create new supplier
                 : Supplier::create([
                     'name' => $request->input('supplier.name'),
@@ -84,7 +83,7 @@ class PurchaseController extends Controller
             // Makes array of items in order to be attached to purchase record
             $items = array_reduce($request->input('items'), function($items, $item) {
                 // Find the product
-                $product = Product::findOrFail($item['id']);
+                $product = Product::find($item['id']);
                 // Throw if product is not sellable
                 if ($product->isNotPurchasable()) throw new ProductIsNotSellableException($product);
                 // Decrement product items stock
@@ -129,9 +128,7 @@ class PurchaseController extends Controller
     public function show($id)
     {
         // Find the purchase or fail
-        $purchase = Purchase::findOrFail($id);
-        // return the resource
-        return $purchase;
+        return Purchase::findOrFail($id);
     }
 
     /**
@@ -151,7 +148,7 @@ class PurchaseController extends Controller
                 // Set the purchase user
                 $purchase->user()->associate(
                     // Find the user or throw exception if not found
-                    User::findOrFail($request->input('user_id'))
+                    User::find($request->input('user_id'))
                 );
             }
 
@@ -160,7 +157,7 @@ class PurchaseController extends Controller
                 // Set the purchase user
                 $purchase->supplier()->associate(
                     // Find or create the supplier
-                    Supplier::findOrFail($request->input('supplier_id'))
+                    Supplier::find($request->input('supplier_id'))
                 );
 
             } elseif ($request->filled('supplier')) {

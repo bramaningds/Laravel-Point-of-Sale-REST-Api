@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
-use Throwable;
-
+use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class StoreSaleRequest extends FormRequest
 {
@@ -24,17 +24,40 @@ class StoreSaleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'required|numeric|integer',
-            'customer_id' => 'required_without:customer|numeric|integer',
+            'user_id' => 'required|numeric|integer|exists:users,id',
+            'customer_id' => 'required_without:customer|numeric|integer|exists:customers,id',
             'customer.name' => 'required_without:customer_id|string',
             'customer.phone' => 'string',
             'customer.email' => 'string',
             'customer.address' => 'string',
             'items' => 'required',
-            'items.*.id' => 'required|numeric',
+            'items.*.id' => 'required|numeric|exists:products',
             'items.*.quantity' => 'required|numeric',
             'items.*.price' => 'numeric',
         ];
     }
 
+    public function after(): array
+    {
+        $products = Product::whereIn('id', $this->input('items.*.id', []))->get();
+
+        return [
+            function (Validator $validator) use ($products) {
+                foreach ($products as $index => $product) {
+                    if ($product->isNotSellable()) {
+                        $validator->errors()->add("items.{$index}.id", "The product is not sellable.");
+                    }
+                }
+            },
+            function (Validator $validator) use ($products) {
+                foreach ($products as $index => $product) {
+                    if ($product->hasInsufficientStock($this->input("items.{$index}.quantity"))) {
+                        $this->validator->errors()->add(
+                            "items.{$index}.quantity", "The product's stock ({$product->stock}) is not sufficient with the required ({$this->input("items.{$index}.quantity")})."
+                        );
+                    }
+                }
+            },
+        ];
+    }
 }

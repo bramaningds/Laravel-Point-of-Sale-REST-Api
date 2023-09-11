@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Base;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+use App\Exceptions\ProductIsNotSellableException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSaleItemRequest;
 use App\Http\Requests\UpdateSaleItemRequest;

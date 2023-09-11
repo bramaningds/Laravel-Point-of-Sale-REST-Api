@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 use Tests\TestCase;
 
+use App\Models\Category;
 use App\Models\Supplier;
 use App\Models\Product;
 use App\Models\Purchase;
@@ -30,7 +31,7 @@ class PurchaseTest extends TestCase
     {
         $user = User::factory()->create();
         $supplier = Supplier::factory()->sequence(fn() => ['name' => 'bram'])->create();
-        $products = Product::factory()->count(3)->create();
+        $products = Product::factory()->count(3)->for(Category::factory())->create();
 
         $purchase = Purchase::factory()
                     ->for($user)
@@ -52,7 +53,7 @@ class PurchaseTest extends TestCase
     {
         $user = User::factory()->create();
         $supplier = Supplier::factory()->sequence(fn() => ['name' => 'bram'])->create();
-        $products = Product::factory()->count(3)->sequence(fn() => ['purchasable' => 'Y', 'stock' => 10])->create();
+        $products = Product::factory()->count(3)->for(Category::factory())->sequence(fn() => ['purchasable' => 'Y', 'stock' => 10])->create();
 
         $response = $this->postJson('/api/purchase', [
             'user_id' => $user->id,
@@ -85,7 +86,7 @@ class PurchaseTest extends TestCase
     {
         $user = User::factory()->create();
         $supplier = Supplier::factory()->sequence(fn() => ['name' => 'bram'])->create();
-        $products = Product::factory()->count(3)->create();
+        $products = Product::factory()->count(3)->for(Category::factory())->create();
         $purchase = Purchase::factory()
                     ->for($user)
                     ->for($supplier)
@@ -106,7 +107,7 @@ class PurchaseTest extends TestCase
     {
         $user = User::factory()->create();
         $supplier = Supplier::factory()->create();
-        $products = Product::factory()->count(3)->create();
+        $products = Product::factory()->count(3)->for(Category::factory())->create();
         $purchase = Purchase::factory()
                     ->for($user)
                     ->for($supplier)
@@ -133,7 +134,7 @@ class PurchaseTest extends TestCase
     {
         $user = User::factory()->create();
         $supplier = Supplier::factory()->create();
-        $products = Product::factory()->count(3)->create();
+        $products = Product::factory()->count(3)->for(Category::factory())->create();
         $purchase = Purchase::factory()
                     ->for($user)
                     ->for($supplier)

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
@@ -20,10 +21,15 @@ class Product extends Model
         'price' => 'float',
     ];
 
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
     public function scopeSearch(Builder $query, string $keyword)
     {
         $query->orWhere('name', 'like', "%{$keyword}%")
-              ->orWhere('description', 'like', "%{$keyword}%");
+            ->orWhere('description', 'like', "%{$keyword}%");
     }
 
     public function isSellable(): bool
@@ -33,7 +39,7 @@ class Product extends Model
 
     public function isNotSellable(): bool
     {
-        return ! $this->isSellable();
+        return !$this->isSellable();
     }
 
     public function hasSufficientStock($required = 0): bool
@@ -43,7 +49,7 @@ class Product extends Model
 
     public function hasInsufficientStock($required = 0): bool
     {
-        return ! $this->hasSufficientStock($required);
+        return !$this->hasSufficientStock($required);
     }
 
     public function isPurchasable(): bool
@@ -53,7 +59,7 @@ class Product extends Model
 
     public function isNotPurchasable(): bool
     {
-        return ! $this->isPurchasable();
+        return !$this->isPurchasable();
     }
 
 }

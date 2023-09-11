@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class StorePurchaseItemRequest extends FormRequest
 {
@@ -22,10 +24,22 @@ class StorePurchaseItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|integer',
+            'id' => 'required|integer|exists:products',
             'quantity' => 'required|numeric',
             'price' => 'numeric',
         ];
     }
 
+    public function after(): array
+    {
+        $product = Product::find($this->input('id'));
+
+        return [
+            function (Validator $validator) use ($product) {
+                if ($product->isNotPurchasable()) {
+                    $validator->errors()->add('id', 'The product is not purchasable.');
+                }
+            },
+        ];
+    }
 }

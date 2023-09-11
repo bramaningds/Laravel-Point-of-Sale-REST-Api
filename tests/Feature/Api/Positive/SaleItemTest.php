@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 use Tests\TestCase;
 
+use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Sale;
@@ -19,7 +20,7 @@ class SaleItemTest extends TestCase
     {
         $user = User::factory()->create();
         $customer = Customer::factory()->sequence(fn() => ['name' => 'bram'])->create();
-        $products = Product::factory()->count(3)->create();
+        $products = Product::factory()->count(3)->for(Category::factory())->create();
 
         $sale = Sale::factory()
                     ->for($user)
@@ -39,7 +40,7 @@ class SaleItemTest extends TestCase
     {
         $user = User::factory()->create();
         $customer = Customer::factory()->sequence(fn() => ['name' => 'bram'])->create();
-        $products = Product::factory()->count(3)->create();
+        $products = Product::factory()->count(3)->for(Category::factory())->create();
 
         $sale = Sale::factory()
                     ->for($user)
@@ -61,7 +62,7 @@ class SaleItemTest extends TestCase
     {
         $user = User::factory()->create();
         $customer = Customer::factory()->sequence(fn() => ['name' => 'bram'])->create();
-        $products = Product::factory()->count(2)->sequence(fn() => ['sellable' => 'Y', 'stock' => 10])->create();
+        $products = Product::factory()->count(2)->for(Category::factory())->sequence(fn() => ['sellable' => 'Y', 'stock' => 10])->create();
 
         $sale = Sale::factory()
                     ->for($user)
@@ -69,7 +70,7 @@ class SaleItemTest extends TestCase
                     ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
                     ->create();
 
-        $product = Product::factory()->sequence(fn() => ['sellable' => 'Y', 'stock' => 10])->create();
+        $product = Product::factory()->sequence(fn() => ['sellable' => 'Y', 'stock' => 10])->for(Category::factory())->create();
 
         $response = $this->postJson("/api/sale/{$sale->id}/item", [
             'id' => $product->id,

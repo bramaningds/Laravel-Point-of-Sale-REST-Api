@@ -23,7 +23,7 @@ class ProductFactory extends Factory
             'name' => fake()->unique()->words(fake()->numberBetween(2, 10), true),
             'description' => fake()->text(100),
             'price' => 500 * fake()->numberBetween(10, 50),
-            'stock' => 200,
+            'stock' => 1000,
             'sellable' => $this->yn[rand(0, count($this->yn)-1)],
             'purchasable' => $this->yn[rand(0, count($this->yn)-1)],
         ];

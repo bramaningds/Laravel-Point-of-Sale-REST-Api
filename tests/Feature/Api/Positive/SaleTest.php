@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 use Tests\TestCase;
 
+use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Sale;
@@ -33,7 +34,7 @@ class SaleTest extends TestCase
     {
         $user = User::factory()->create();
         $customer = Customer::factory()->sequence(fn() => ['name' => 'bram'])->create();
-        $products = Product::factory()->count(3)->create();
+        $products = Product::factory()->count(3)->for(Category::factory())->create();
 
         $sale = Sale::factory()
                     ->for($user)
@@ -55,7 +56,7 @@ class SaleTest extends TestCase
     {
         $user = User::factory()->create();
         $customer = Customer::factory()->sequence(fn() => ['name' => 'bram'])->create();
-        $products = Product::factory()->count(3)->sequence(fn() => ['sellable' => 'Y', 'stock' => 10])->create();
+        $products = Product::factory()->count(3)->for(Category::factory())->sequence(fn() => ['sellable' => 'Y', 'stock' => 10])->create();
 
         $response = $this->postJson('/api/sale', [
             'user_id' => $user->id,
@@ -88,7 +89,7 @@ class SaleTest extends TestCase
     {
         $user = User::factory()->create();
         $customer = Customer::factory()->sequence(fn() => ['name' => 'bram'])->create();
-        $products = Product::factory()->count(3)->create();
+        $products = Product::factory()->count(3)->for(Category::factory())->create();
         $sale = Sale::factory()
                     ->for($user)
                     ->for($customer)
@@ -109,7 +110,7 @@ class SaleTest extends TestCase
     {
         $user = User::factory()->create();
         $customer = Customer::factory()->create();
-        $products = Product::factory()->count(3)->create();
+        $products = Product::factory()->count(3)->for(Category::factory())->create();
         $sale = Sale::factory()
                     ->for($user)
                     ->for($customer)
@@ -136,7 +137,7 @@ class SaleTest extends TestCase
     {
         $user = User::factory()->create();
         $customer = Customer::factory()->create();
-        $products = Product::factory()->count(3)->create();
+        $products = Product::factory()->count(3)->for(Category::factory())->create();
         $sale = Sale::factory()
                     ->for($user)
                     ->for($customer)

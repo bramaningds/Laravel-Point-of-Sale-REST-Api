@@ -2,17 +2,15 @@
 
 namespace App\Http\Controllers\Base;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSaleRequest;
 use App\Http\Requests\UpdateSaleRequest;
-use App\Http\Resources\SaleResource;
-use App\Models\Sale;
-use App\Models\User;
 use App\Models\Customer;
 use App\Models\Product;
+use App\Models\Sale;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SaleController extends Controller
 {
@@ -53,7 +51,6 @@ class SaleController extends Controller
 
         $sales = $query->paginate();
 
-        // return \DB::getQueryLog();
         return $sales;
     }
 
@@ -67,12 +64,12 @@ class SaleController extends Controller
             DB::beginTransaction();
 
             // Find the user
-            $user = User::findOrFail($request->input('user_id'));
+            $user = User::find($request->input('user_id'));
 
             // Find or create the customer
             $customer = $request->filled('customer_id')
                 // Find customer or throw exception
-                ? Customer::findOrFail($request->input('customer_id'))
+                ? Customer::find($request->input('customer_id'))
                 // Create new customer
                 : Customer::create([
                     'name' => $request->input('customer.name'),
@@ -82,19 +79,15 @@ class SaleController extends Controller
                 ]);
 
             // Makes array of items in order to be attached to sale record
-            $items = array_reduce($request->input('items'), function($items, $item) {
+            $items = array_reduce($request->input('items'), function ($items, $item) {
                 // Find the product
-                $product = Product::findOrFail($item['id']);
-                // Throw if product is not sellable
-                if ($product->isNotSellable()) throw new ProductIsNotSellableException($product);
-                // Throw if product has insufficient required stock
-                if ($product->hasInsufficientStock($item['quantity'])) throw new ProductHasInsufficientStock($product, $item['quantity']);
+                $product = Product::find($item['id']);
                 // Decrement product items stock
                 $product->decrement('stock', $item['quantity']);
                 // Set the item as in forms of attaching item requirement
                 $items[$product->id] = [
                     'quantity' => $item['quantity'],
-                    'price' => $item['price'] ?? $product->price
+                    'price' => $item['price'] ?? $product->price,
                 ];
 
                 return $items;
@@ -131,7 +124,7 @@ class SaleController extends Controller
     public function show($id)
     {
         // Find the sale or fail
-        $sale = Sale::findOrFail($id);
+        $sale = Sale::find($id);
         // return the resource
         return $sale;
     }
@@ -142,7 +135,7 @@ class SaleController extends Controller
     public function update(UpdateSaleRequest $request, $id)
     {
         // Find the sale
-        $sale = Sale::findOrFail($id);
+        $sale = Sale::find($id);
 
         try {
             // Begin transaction
@@ -153,7 +146,7 @@ class SaleController extends Controller
                 // Set the sale user
                 $sale->user()->associate(
                     // Find the user or throw exception if not found
-                    User::findOrFail($request->input('user_id'))
+                    User::find($request->input('user_id'))
                 );
             }
 
@@ -162,7 +155,7 @@ class SaleController extends Controller
                 // Set the sale user
                 $sale->customer()->associate(
                     // Find or create the customer
-                    Customer::findOrFail($request->input('customer_id'))
+                    Customer::find($request->input('customer_id'))
                 );
 
             } elseif ($request->filled('customer')) {
@@ -201,14 +194,14 @@ class SaleController extends Controller
     public function destroy($id)
     {
         try {
-             // Find the sale
-            $sale = Sale::with('items')->findOrFail($id, ['id']);
+            // Find the sale
+            $sale = Sale::with('items')->find($id, ['id']);
 
-             // Begin transaction
+            // Begin transaction
             DB::beginTransaction();
 
             // Increment the stock used
-            $sale->items->each(function($product) {
+            $sale->items->each(function ($product) {
                 $product->increment('stock', $product->pivot->quantity);
             });
             // Remove the sale record

@@ -12,12 +12,13 @@ class PurchaseItem extends Pivot
     protected $table = 'purchase_items';
 
     protected $fillable = [
-        'product_id', 'quantity', 'price'
+        'product_id', 'quantity', 'price',
     ];
 
     public $timestamps = false;
 
-    public function getTotalAttribute() : float {
+    public function getTotalAttribute(): float
+    {
         return $this->quantity * $this->price;
     }
 

@@ -25,7 +25,7 @@ class SaleItemController extends BaseSaleItemController
      */
     public function store($sale_id, StoreSaleItemRequest $request)
     {
-        return ItemResource::make(parent::store($sale_id, $request));
+        return ItemResource::make(parent::store($sale_id, $request));        
     }
 
     /**

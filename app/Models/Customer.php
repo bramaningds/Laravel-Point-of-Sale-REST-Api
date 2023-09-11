@@ -29,8 +29,7 @@ class Customer extends Model
 
     public function scopeSearch(Builder $query, string $keyword)
     {
-        $query->whereRaw('FALSE')
-            ->orWhere('name', 'like', "%{$keyword}%")
+        $query->orWhere('name', 'like', "%{$keyword}%")
             ->orWhere('email', 'like', "%{$keyword}%")
             ->orWhere('phone', 'like', "%{$keyword}%")
             ->orWhere('address', 'like', "%{$keyword}%");
