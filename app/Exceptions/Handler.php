@@ -2,16 +2,10 @@
 
 namespace App\Exceptions;
 
-use Throwable;
-
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
-
-use App\Exceptions\ProductIsNotSellableException;
-use App\Exceptions\ProductHasInsufficientStock;
+use Throwable;
 
 class Handler extends ExceptionHandler
 {
@@ -34,28 +28,22 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
-
-        $this->renderable(function (ValidationException $e, Request $request) {
-            return $request->is('api/*')
-                ? response()->json(['error' => $e->getMessage(), 'data' => $e->errors()], $e->status)
-                : $e->getResponse();
-        });
-
-        // $this->renderable(function (ProductIsNotSellableException $e, Request $request) {
-        //     return $request->is('api/*')
-        //         ? response()->json(['error' => $e->getMessage(), 'input' => $request->all()], 422)
-        //         : $e->getResponse();
-        // });
-
-        // $this->renderable(function (ProductHasInsufficientStock $e, Request $request) {
-        //     return $request->is('api/*')
-        //         ? response()->json(['error' => $e->getMessage(), 'input' => $request->all()], 422)
-        //         : $e->getResponse();
-        // });
     }
 
-    // public function render($request, Throwable $e)
-    // {
-    //     return parent::render($request, $e);
-    // }
+    public function render($request, Throwable $e)
+    {
+        if (config('app.debug')) {
+            return parent::render($request, $e);
+        }
+
+        if ($e instanceof ModelNotFoundException) {
+            return response()->json(['error' => 'Resource not found'], 404);
+        }
+
+        if ($e instanceof QueryException) {
+            return response()->json(['error' => 'Failed to process database operation'], 500);
+        }
+
+        return response()->json(['error' => 'Failed to process request'], 500);
+    }
 }

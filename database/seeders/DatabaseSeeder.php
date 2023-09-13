@@ -40,9 +40,9 @@ class DatabaseSeeder extends Seeder
         // create categories
         $categories = Category::factory()->count($this->categoryCount)->create();
         // create products
-        $products = Product::factory()->count($this->productCount)->sequence(function($sequence) use ($categories) {
+        $products = Product::factory()->count($this->productCount)->sequence(function ($sequence) use ($categories) {
             return [
-                'category_id' => $categories->random()->id
+                'category_id' => $categories->random()->id,
             ];
         })->create();
         // create sales

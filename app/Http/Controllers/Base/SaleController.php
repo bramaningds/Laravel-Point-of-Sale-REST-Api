@@ -124,7 +124,7 @@ class SaleController extends Controller
     public function show($id)
     {
         // Find the sale or fail
-        $sale = Sale::find($id);
+        $sale = Sale::with('user', 'customer', 'items')->findOrFail($id);
         // return the resource
         return $sale;
     }
@@ -135,7 +135,7 @@ class SaleController extends Controller
     public function update(UpdateSaleRequest $request, $id)
     {
         // Find the sale
-        $sale = Sale::find($id);
+        $sale = Sale::findOrFail($id);
 
         try {
             // Begin transaction
@@ -195,7 +195,7 @@ class SaleController extends Controller
     {
         try {
             // Find the sale
-            $sale = Sale::with('items')->find($id, ['id']);
+            $sale = Sale::with('items')->findOrFail($id, ['id']);
 
             // Begin transaction
             DB::beginTransaction();

@@ -52,9 +52,7 @@ class SupplierController extends Controller
      */
     public function show($id)
     {
-        $supplier = Supplier::findOrFail($id);
-
-        return $supplier;
+        return Supplier::findOrFail($id);
     }
 
     /**
@@ -69,7 +67,7 @@ class SupplierController extends Controller
         $supplier->email = $request->input('email', $supplier->email);
         $supplier->address = $request->input('address', $supplier->address);
 
-        $supplier->save();
+        $supplier->saveOrFail();
 
         return $supplier;
     }
@@ -79,8 +77,6 @@ class SupplierController extends Controller
      */
     public function destroy($id)
     {
-        $supplier = Supplier::findOrFail($id, ['id']);
-
-        return $supplier->delete();
+        return Supplier::findOrFail($id, ['id'])->deleteOrFail();
     }
 }

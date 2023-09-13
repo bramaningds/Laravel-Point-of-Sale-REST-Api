@@ -128,7 +128,7 @@ class PurchaseController extends Controller
     public function show($id)
     {
         // Find the purchase or fail
-        return Purchase::findOrFail($id);
+        return Purchase::with('user', 'supplier', 'items')->findOrFail($id);
     }
 
     /**
@@ -206,6 +206,7 @@ class PurchaseController extends Controller
             $purchase->items->each(function($product) {
                 $product->increment('stock', $product->pivot->quantity);
             });
+
             // Remove the purchase record
             $purchase->delete();
 

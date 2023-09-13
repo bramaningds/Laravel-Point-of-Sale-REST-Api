@@ -37,29 +37,25 @@ class Sale extends Model
 
     public function getTotalAttribute(): Float
     {
-        $items = $this->items->toArray() ?: [];
-
-        $subtotal = array_reduce($items, function ($carry, $item) {
-            return $carry + ($item['pivot']['quantity'] * $item['pivot']['price']);
-        }, 0);
-
-        $total = $subtotal;
-
-        return $total;
+        return array_reduce($this->items?->toArray() ?? [], function ($total, $item) {
+            return ($total ?? 0) + ($item['pivot']['quantity'] * $item['pivot']['price']);
+        });
     }
 
     public function scopeSearch(Builder $query, string $keyword)
     {
-        $query->whereIn('id', Sale::query()->selectRaw('DISTINCT(sales.id) as id')
-                ->join('users', 'users.id', '=', 'user_id')
-                ->join('customers', 'customers.id', '=', 'customer_id')
-                ->join('sale_items', 'sales.id', '=', 'sale_items.sale_id')
-                ->join('products', 'products.id', '=', 'sale_items.product_id')
-                ->whereRaw('FALSE')
-                ->orWhere('users.name', 'like', "%{$keyword}%")
-                ->orWhere('customers.name', 'like', "%{$keyword}%")
-                ->orWhere('products.name', 'like', "%{$keyword}%")
-                ->pluck('id'));
+        $sale_ids = Sale::query()->selectRaw('DISTINCT(sales.id) as id')
+            ->join('users', 'users.id', '=', 'user_id')
+            ->join('customers', 'customers.id', '=', 'customer_id')
+            ->join('sale_items', 'sales.id', '=', 'sale_items.sale_id')
+            ->join('products', 'products.id', '=', 'sale_items.product_id')
+            ->whereRaw('FALSE')
+            ->orWhere('users.name', 'like', "%{$keyword}%")
+            ->orWhere('customers.name', 'like', "%{$keyword}%")
+            ->orWhere('products.name', 'like', "%{$keyword}%")
+            ->pluck('id');
+
+        $query->whereIn('id', $sale_ids);
     }
 
     public function scopeOfUser(Builder $query, string $user_id)
@@ -85,7 +81,20 @@ class Sale extends Model
         $sale_ids = Sale::query()->selectRaw('sales.id as id')
             ->join('sale_items', 'sales.id', '=', 'sale_items.sale_id')
             ->where('sale_items.product_id', $product_id)
-            ->pluck('id');
+            ->pluck('id')
+            ->toArray();
+
+        $query->whereIn('id', $sale_ids);
+    }
+
+    public function scopeOfCategory(Builder $query, string $category_id)
+    {
+        $sale_ids = Sale::query()->selectRaw('sales.id as id')
+            ->join('sale_items', 'sales.id', '=', 'sale_items.sale_id')
+            ->join('products', 'products.id', '=', 'sale_items.product_id')
+            ->whereIn('products.category_id', $category_id)
+            ->pluck('id')
+            ->toArray();
 
         $query->whereIn('id', $sale_ids);
     }

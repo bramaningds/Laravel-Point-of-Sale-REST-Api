@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers\Base;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
-use App\Http\Resources\ProductResource;
 use App\Models\Product;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
@@ -26,6 +23,10 @@ class ProductController extends Controller
 
         if ($request->filled('keyword')) {
             $query->search($request->input('keyword'));
+        }
+
+        if ($request->filled('category_id')) {
+            $query->ofCategory($request->input('category_id'));
         }
 
         return $query->paginate();
@@ -86,6 +87,7 @@ class ProductController extends Controller
         $product->name = $request->input('name', $product->name);
         $product->description = $request->input('description', $product->description);
         $product->price = $request->input('price', $product->price);
+        $product->stock = $request->input('stock', $product->stock);
         $product->sellable = $request->input('sellable', $product->sellable);
         $product->purchasable = $request->input('purchasable', $product->purchasable);
 

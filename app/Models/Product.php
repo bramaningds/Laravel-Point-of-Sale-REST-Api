@@ -32,6 +32,11 @@ class Product extends Model
             ->orWhere('description', 'like', "%{$keyword}%");
     }
 
+    public function scopeOfCategory(Builder $query, string $category_id)
+    {
+        $query->where('category_id', $category_id);
+    }
+
     public function isSellable(): bool
     {
         return $this->sellable == 'Y';
