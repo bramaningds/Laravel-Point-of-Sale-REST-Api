@@ -26,4 +26,5 @@ class UpdateSaleItemRequest extends FormRequest
             'price' => 'numeric',
         ];
     }
+
 }

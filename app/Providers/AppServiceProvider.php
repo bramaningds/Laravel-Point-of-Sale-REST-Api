@@ -3,9 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,7 +21,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        DB::enableQueryLog();
+        // Enable query log if debug is enabled
+        config('app.debug') && DB::enableQueryLog();
+
+        // Set model to not lazy load relation
         Model::shouldBeStrict();
     }
 }

@@ -41,9 +41,7 @@ class DatabaseSeeder extends Seeder
         $categories = Category::factory()->count($this->categoryCount)->create();
         // create products
         $products = Product::factory()->count($this->productCount)->sequence(function ($sequence) use ($categories) {
-            return [
-                'category_id' => $categories->random()->id,
-            ];
+            return ['category_id' => $categories->random()->id];
         })->create();
         // create sales
         $sales = Sale::factory()->count($this->saleCount)->sequence(function ($sequence) use ($users, $customers) {
@@ -132,6 +130,21 @@ class DatabaseSeeder extends Seeder
                 GROUP BY products.id) AS stocks
             SET products.stock = products.stock - stocks.stock
             WHERE products.id = stocks.id
+        ');
+
+        DB::update('
+            UPDATE sale_items
+            JOIN (SELECT sale_id, product_id, MAX(id) max_id
+                  FROM sale_items
+                  GROUP BY sale_id, product_id
+                  HAVING COUNT(*) > 1) AS B 
+                  ON B.sale_id = sale_items.sale_id 
+                  AND B.product_id = sale_items.product_id
+            SET created_at = IF(id = max_id, DATE_ADD(created_at, INTERVAL 30 MINUTE), created_at)
+              , updated_at = DATE_ADD(updated_at, INTERVAL 30 MINUTE)
+              -- if not newest product id then delete
+              , deleted_at = IF(id != max_id, DATE_ADD(updated_at, INTERVAL 30 MINUTE), NULL)
+            WHERE B.sale_id IS NOT NULL
         ');
     }
 }

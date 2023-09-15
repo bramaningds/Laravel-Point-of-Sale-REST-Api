@@ -31,8 +31,9 @@ class Sale extends Model
     {
         return $this->belongsToMany(Product::class, 'sale_items')
             ->using(SaleItem::class)
+            ->withTimestamps()
             ->withPivot('quantity', 'price')
-            ->withTimestamps();
+            ->wherePivotNull('deleted_at');
     }
 
     public function getTotalAttribute(): Float

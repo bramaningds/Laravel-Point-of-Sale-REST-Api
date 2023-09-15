@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Product;
+use App\Models\SaleItem;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
@@ -35,11 +36,27 @@ class StoreSaleItemRequest extends FormRequest
         $product = Product::find($this->input('id'));
 
         return [
+
+            // Validate the product existence in the sale items
+            function (Validator $validator) {
+                // Check if the product is already existing in the sale item
+                $existing_sale_item = SaleItem::where('sale_id', $this->segment(3))->where('product_id', $this->input('id'))->exists();
+
+                if ($existing_sale_item) {
+                    $this->validator->errors()->add(
+                        'id', "The product already exists in the sale items."
+                    );
+                }
+            },
+
+            // Validate if the product is sellable
             function (Validator $validator) use ($product) {
                 if ($product->isNotSellable()) {
                     $validator->errors()->add('id', 'The product is not sellable.');
                 }
             },
+
+            // Validate if the product has sufficient stock to sell
             function (Validator $validator) use ($product) {
                 if ($product->hasInsufficientStock($this->input('quantity'))) {
                     $this->validator->errors()->add(

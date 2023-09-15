@@ -16,7 +16,10 @@ class SaleController extends Controller
 {
 
     /**
-     * Display a listing of the resource.
+     * Paginate the sale resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
     public function index(Request $request)
     {

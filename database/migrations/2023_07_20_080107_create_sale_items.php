@@ -19,7 +19,7 @@ return new class extends Migration
             $table->unsignedfloat('price');
             $table->timestamps();
             $table->softDeletes();
-            $table->unique(['sale_id', 'product_id']);
+            $table->index(['sale_id', 'product_id']);
         });
     }
 

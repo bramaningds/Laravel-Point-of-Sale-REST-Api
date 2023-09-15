@@ -86,6 +86,7 @@ class ProductController extends Controller
 
         $product->name = $request->input('name', $product->name);
         $product->description = $request->input('description', $product->description);
+        $product->category_id = $request->input('category_id', $product->category_id);
         $product->price = $request->input('price', $product->price);
         $product->stock = $request->input('stock', $product->stock);
         $product->sellable = $request->input('sellable', $product->sellable);
