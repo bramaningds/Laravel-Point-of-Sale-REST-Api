@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Product;
+use App\Models\Sale;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,10 +15,20 @@ class SaleItem extends Pivot
     protected $table = 'sale_items';
 
     protected $fillable = [
-        'sale_id', 'product_id', 'quantity', 'price', 'deleted_at',
+        'quantity', 'price', 'deleted_at',
     ];
 
     public $timestamps = true;
+
+    public function sale()
+    {
+        return $this->belongsTo(Sale::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 
     public function getTotalAttribute(): float
     {

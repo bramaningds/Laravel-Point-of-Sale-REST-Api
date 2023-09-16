@@ -26,6 +26,12 @@ class DatabaseSeeder extends Seeder
     protected $saleCount = 100;
     protected $purchaseCount = 100;
 
+    private function generateItemCount()
+    {
+        $options = [1, 1, 2, 2, 2, 3, 3, 4, 5, 6, 7];
+        return $options[rand(0, count($options) - 1)];
+    }
+
     /**
      * Seed the application's database.
      */
@@ -33,54 +39,20 @@ class DatabaseSeeder extends Seeder
     {
         // create users
         $users = User::factory()->count($this->userCount)->create();
+
         // create customers
         $customers = Customer::factory()->count($this->customerCount)->create();
+
         // create customers
         $suppliers = Supplier::factory()->count($this->supplierCount)->create();
+
         // create categories
         $categories = Category::factory()->count($this->categoryCount)->create();
+
         // create products
         $products = Product::factory()->count($this->productCount)->sequence(function ($sequence) use ($categories) {
             return ['category_id' => $categories->random()->id];
         })->create();
-        // create sales
-        $sales = Sale::factory()->count($this->saleCount)->sequence(function ($sequence) use ($users, $customers) {
-            return [
-                'user_id' => $users->random()->id,
-                'customer_id' => $customers->random()->id,
-            ];
-        })->create();
-
-        // foreach sale create some sale items
-        $sale_items = $sales->reduce(function ($sale_items, $sale) use ($products) {
-            $sale_items = $sale_items ?? collect([]);
-
-            // items count, most count are 1,2,3 and the rest
-            $options = [1, 2, 2, 2, 3, 3, 4, 5, 6, 7];
-            $count = $options[rand(0, count($options) - 1)];
-
-            try {
-                $sale_item = SaleItem::factory()->count($count)->sequence(function ($sequence) use ($sale, $products) {
-                    $product = $products->random();
-
-                    return [
-                        'sale_id' => $sale->id,
-                        'product_id' => $product->id,
-                        'price' => $product->price,
-                        'created_at' => $sale->created_at,
-                        'updated_at' => $sale->created_at,
-                    ];
-
-                })->create();
-
-                return $sale_items->merge($sale_item);
-
-            } catch (\Exception $e) {
-
-                return $sale_items;
-
-            }
-        });
 
         // create purchases
         $purchases = Purchase::factory()->count($this->purchaseCount)->sequence(function ($sequence) use ($users, $suppliers) {
@@ -91,60 +63,41 @@ class DatabaseSeeder extends Seeder
         })->create();
 
         // foreach sale create some purchase items
-        $purchase_items = $purchases->reduce(function ($purchase_items, $purchase) use ($products) {
-            $purchase_items = $purchase_items ?? collect([]);
+        $purchase_items = $purchases->map(function($purchase) use ($products) {
+            return PurchaseItem::factory()->count($this->generateItemCount())->sequence(function ($sequence) use ($purchase, $products) {
+                $product = $products->random();
 
-            // items count, most count are 1,2,3 and the rest
-            $options = [1, 1, 2, 2, 2, 3, 3, 4, 5, 6, 7];
-            $count = $options[rand(0, count($options) - 1)];
+                return [
+                    'purchase_id' => $purchase->id,
+                    'product_id' => $product->id,
+                    'price' => $product->price,
+                    'created_at' => $purchase->created_at,
+                    'updated_at' => $purchase->created_at,
+                ];
 
-            try {
-                $purchase_items_partial = PurchaseItem::factory()->count($count)->sequence(function ($sequence) use ($purchase, $products) {
-                    $product = $products->random();
-
-                    return [
-                        'purchase_id' => $purchase->id,
-                        'product_id' => $product->id,
-                        'price' => $product->price,
-                        'created_at' => $purchase->created_at,
-                        'updated_at' => $purchase->created_at,
-                    ];
-
-                })->create();
-
-                return $purchase_items->merge($purchase_items_partial);
-
-            } catch (\Exception $e) {
-
-                return $purchase_items;
-
-            }
+            })->create();
         });
 
-        DB::update('
-            UPDATE products, (
-                SELECT products.id, (SUM(purchase_items.quantity) - SUM(sale_items.quantity)) stock
-                FROM products
-                LEFT JOIN purchase_items ON purchase_items.product_id = products.id
-                LEFT JOIN sale_items ON sale_items.product_id = products.id
-                GROUP BY products.id) AS stocks
-            SET products.stock = products.stock - stocks.stock
-            WHERE products.id = stocks.id
-        ');
+        // create sales
+        $sales = Sale::factory()->count($this->saleCount)->sequence(function ($sequence) use ($users, $customers) {
+            return [
+                'user_id' => $users->random()->id,
+                'customer_id' => $customers->random()->id,
+            ];
+        })->create();
 
-        DB::update('
-            UPDATE sale_items
-            JOIN (SELECT sale_id, product_id, MAX(id) max_id
-                  FROM sale_items
-                  GROUP BY sale_id, product_id
-                  HAVING COUNT(*) > 1) AS B 
-                  ON B.sale_id = sale_items.sale_id 
-                  AND B.product_id = sale_items.product_id
-            SET created_at = IF(id = max_id, DATE_ADD(created_at, INTERVAL 30 MINUTE), created_at)
-              , updated_at = DATE_ADD(updated_at, INTERVAL 30 MINUTE)
-              -- if not newest product id then delete
-              , deleted_at = IF(id != max_id, DATE_ADD(updated_at, INTERVAL 30 MINUTE), NULL)
-            WHERE B.sale_id IS NOT NULL
-        ');
+        // create sale_items
+        $sale_items = $sales->map(function($sale) use ($products) {
+            return SaleItem::factory()->count($this->generateItemCount())->sequence(function ($sequence) use ($sale, $products) {
+                $product = $products->random();
+                return [
+                    'sale_id' => $sale->id,
+                    'product_id' => $product->id,
+                    'price' => $product->price,
+                    'created_at' => $sale->created_at,
+                    'updated_at' => $sale->created_at,
+                ];
+            })->create();
+        });
     }
 }

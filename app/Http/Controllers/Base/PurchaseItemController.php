@@ -2,42 +2,36 @@
 
 namespace App\Http\Controllers\Base;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePurchaseItemRequest;
-use App\Http\Requests\UpdatePurchaseItemRequest;
-use App\Http\Resources\ItemResource;
-use App\Models\Purchase;
 use App\Models\Product;
+use App\Models\Purchase;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PurchaseItemController extends Controller
 {
 
     /**
-     * Display a listing of the resource.
+     * Show all purchase items
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function index($purchase_id, Request $request)
+    public function index($purchase_id)
     {
-        $purchase_items = Purchase::with('items')->findOrFail($purchase_id)->items;
-
-        return $purchase_items;
+        return Purchase::with('items')->findOrFail($purchase_id)->items;
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store($purchase_id, StorePurchaseItemRequest $request)
+    public function store(StorePurchaseItemRequest $request, $purchase_id)
     {
         // Find the purchase
-        $purchase = Purchase::with('items')->findOrFail($purchase_id);
-
+        $purchase = Purchase::findOrFail($purchase_id);
         // Find the product
-        $product = Product::findOrFail($request->input('id'));
-
-        // Throw if product is not sellable
-        if ($product->isNotPurchasable()) throw new ProductIsNotSellableException($product);
+        $product = Product::find($request->input('id'));
 
         try {
             // Begin transaction
@@ -49,7 +43,7 @@ class PurchaseItemController extends Controller
             // Attach the product into purchase
             $purchase->items()->attach($product->id, [
                 'quantity' => floatval($request->input('quantity')),
-                'price' => floatval($request->input('price') ?? $product->price)
+                'price' => floatval($request->input('price') ?? $product->price),
             ]);
 
             // Commit database
@@ -71,25 +65,26 @@ class PurchaseItemController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($purchase_id, $product_id)
+    public function show($purchase_id, $id)
     {
-        // Find the purchase
-        $purchase = Purchase::findOrFail($purchase_id);
-        // Find the item
-        $item = $purchase->items()->findOrFail($product_id);
-
-        return $item;
+        return Purchase::findOrFail($purchase_id)->items()->findOrFail($id);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $purchase_id, $product_id)
+    public function update(Request $request, $purchase_id, $id)
     {
         // Find the purchase
         $purchase = Purchase::findOrFail($purchase_id);
         // Find the item
-        $item = $purchase->items()->findOrFail($product_id);
+        $item = $purchase->items()->findOrFail($id);
+
+        // If nothing chages then return
+        if ($item->pivot->quantity == $request->input('quantity', $item->pivot->quantity)
+            && $item->pivot->price == $request->input('price', $item->pivot->price)) {
+            return $item;
+        }
 
         try {
             // Begin transaction
@@ -98,16 +93,19 @@ class PurchaseItemController extends Controller
             // Update the stock
             $item->increment('stock', floatval($item->pivot->quantity) - floatval($request->input('quantity')));
 
-            // Update the purchase item
+            // Update the pivot
             $item->pivot->update([
-                'quantity' => floatval($request->input('quantity') ?? $item->pivot->quantity),
-                'price' => floatval($request->input('price') ?? $item->pivot->price)
+                'quantity' => floatval($request->input('quantity') ?? $item->price),
+                'price' => floatval($request->input('price') ?? $item->price),
             ]);
+
+            // Touch the purchase record
+            $purchase->touch();
 
             // Commit database
             DB::commit();
 
-            return ItemResource::make($item);
+            return $item;
         } catch (Exception $e) {
             // Rollback transaction
             DB::rollback();
@@ -119,12 +117,12 @@ class PurchaseItemController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($purchase_id, $product_id)
+    public function destroy($purchase_id, $id)
     {
         // Find the purchase
         $purchase = Purchase::findOrFail($purchase_id);
         // Find the item
-        $item = $purchase->items()->findOrFail($product_id);
+        $item = $purchase->items()->findOrFail($id);
 
         try {
             // Begin transaction
@@ -132,8 +130,9 @@ class PurchaseItemController extends Controller
 
             // Update the stock
             $item->increment('stock', $item->pivot->quantity);
-            // Detach relation
-            $purchase->items()->detach($product_id);
+
+            // Mark as deleted
+            $item->pivot->update(['deleted_at' => now()]);
 
             // Commit database
             DB::commit();

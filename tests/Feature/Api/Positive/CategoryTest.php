@@ -51,8 +51,6 @@ class CategoryTest extends TestCase
 
         $this->assertDatabaseHas('categories', ['name' => 'bram']);
         $this->assertModelExists(Category::where('name', 'bram')->first(['id']));
-
-        Category::where('name', 'bram')->forceDelete();
     }
 
     public function test_show(): void
@@ -67,8 +65,6 @@ class CategoryTest extends TestCase
             $json->has('data.id');
             $json->where('data.id', $category->id);
         });
-
-        $category->forceDelete();
     }
 
     public function test_update(): void
@@ -87,8 +83,6 @@ class CategoryTest extends TestCase
         });
 
         $this->assertDatabaseHas('categories', ['name' => 'bram']);
-
-        $category->forceDelete();
     }
 
     public function test_delete(): void
@@ -96,13 +90,8 @@ class CategoryTest extends TestCase
         $category = Category::factory()->create();
 
         $response = $this->delete("/api/category/{$category->id}");
-
         $response->assertSuccessful();
 
         $this->assertSoftDeleted($category);
-
-        $category->forceDelete();
-
-        $this->assertModelMissing($category);
     }
 }

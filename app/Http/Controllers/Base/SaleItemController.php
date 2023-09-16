@@ -18,7 +18,7 @@ class SaleItemController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function index($sale_id, Request $request)
+    public function index($sale_id)
     {
         return Sale::with('items')->findOrFail($sale_id)->items;
     }
@@ -26,12 +26,12 @@ class SaleItemController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store($sale_id, StoreSaleItemRequest $request)
+    public function store(StoreSaleItemRequest $request, $sale_id)
     {
         // Find the sale
-        $sale = Sale::with('items')->findOrFail($sale_id);
+        $sale = Sale::findOrFail($sale_id);
         // Find the product
-        $product = Product::findOrFail($request->input('id'));
+        $product = Product::find($request->input('id'));
 
         try {
             // Begin transaction
@@ -65,25 +65,20 @@ class SaleItemController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($sale_id, $product_id)
+    public function show($sale_id, $id)
     {
-        // Find the sale
-        $sale = Sale::findOrFail($sale_id);
-        // Find the item
-        $item = $sale->items()->findOrFail($product_id);
-
-        return $item;
+        return Sale::findOrFail($sale_id)->items()->findOrFail($id);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $sale_id, $product_id)
+    public function update(Request $request, $sale_id, $id)
     {
         // Find the sale
         $sale = Sale::findOrFail($sale_id);
         // Find the item
-        $item = $sale->items()->findOrFail($product_id);
+        $item = $sale->items()->findOrFail($id);
 
         // If nothing chages then return
         if ($item->pivot->quantity == $request->input('quantity', $item->pivot->quantity)
@@ -98,23 +93,18 @@ class SaleItemController extends Controller
             // Update the stock
             $item->increment('stock', floatval($item->pivot->quantity) - floatval($request->input('quantity')));
 
-            // Mark as deleted item
-            $item->pivot->delete();
-
-            // Attach new item into the sale
-            $sale->items()->attach($product_id, [
-                'quantity' => floatval($request->input('quantity')),
+            // Update the pivot
+            $item->pivot->update([
+                'quantity' => floatval($request->input('quantity') ?? $item->price),
                 'price' => floatval($request->input('price') ?? $item->price),
             ]);
+
+            // Touch the sale record
+            $sale->touch();
 
             // Commit database
             DB::commit();
 
-            $item = $sale->items()->find($product_id);
-            // Makes laravel to return 201 http status code
-            $item->wasRecentlyCreated = false;
-
-            // return DB::getQueryLog();
             return $item;
         } catch (Exception $e) {
             // Rollback transaction
@@ -127,12 +117,12 @@ class SaleItemController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($sale_id, $product_id)
+    public function destroy($sale_id, $id)
     {
         // Find the sale
         $sale = Sale::findOrFail($sale_id);
         // Find the item
-        $item = $sale->items()->findOrFail($product_id);
+        $item = $sale->items()->findOrFail($id);
 
         try {
             // Begin transaction
@@ -141,8 +131,8 @@ class SaleItemController extends Controller
             // Update the stock
             $item->increment('stock', $item->pivot->quantity);
 
-            // Detach relation
-            $sale->items()->detach($product_id);
+            // Mark as deleted
+            $item->pivot->update(['deleted_at' => now()]);
 
             // Commit database
             DB::commit();

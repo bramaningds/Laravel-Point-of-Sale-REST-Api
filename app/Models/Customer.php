@@ -22,7 +22,7 @@ class Customer extends Model
         return $this->hasMany(Sale::class);
     }
 
-    public function last_order()
+    public function last_order(): HasOne
     {
         return $this->hasOne(Sale::class)->ofMany('created_at', 'max');
     }

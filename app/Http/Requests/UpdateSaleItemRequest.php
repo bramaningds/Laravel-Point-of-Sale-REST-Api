@@ -22,8 +22,8 @@ class UpdateSaleItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'quantity' => 'required|numeric',
-            'price' => 'numeric',
+            'quantity' => 'required_without:price|numeric',
+            'price' => 'required_without:quantity|numeric',
         ];
     }
 
