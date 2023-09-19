@@ -16,8 +16,10 @@ class CategoryFactory extends Factory
      */
     public function definition(): array
     {
+        $words_count = fake()->randomElement([1,1,2,2,3]);
+
         return [
-            'name' => fake()->name(),
+            'name' => fake()->words($words_count, true),
             'created_at' => fake()->dateTimeThisMonth(),
         ];
     }

@@ -87,10 +87,21 @@ class ProductController extends Controller
         $product->name = $request->input('name', $product->name);
         $product->description = $request->input('description', $product->description);
         $product->category_id = $request->input('category_id', $product->category_id);
-        $product->price = $request->input('price', $product->price);
         $product->stock = $request->input('stock', $product->stock);
+        $product->price = $request->input('price', $product->price);
         $product->sellable = $request->input('sellable', $product->sellable);
         $product->purchasable = $request->input('purchasable', $product->purchasable);
+
+        if ($product->isDirty('stock')) {
+            $mutation = $product->stock - $product->getOriginal('stock');
+
+            $product->mutations()->create([
+                'mutation_type' => 'adjustment',
+                'debet' => $mutation > 0 ? $mutation : 0,
+                'credit' => $mutation < 0 ? $mutation : 0,
+                'balance' => $product->stock,
+            ]);
+        }
 
         $product->saveOrFail();
 

@@ -40,8 +40,11 @@ class DatabaseSeeder extends Seeder
         // create users
         $users = User::factory()->count($this->userCount)->create();
 
+        // create guest customer
+        Customer::factory()->sequence(fn() => ['name' => 'Guest', 'phone' => null, 'address' => null, 'email' => null])->create();
+
         // create customers
-        $customers = Customer::factory()->count($this->customerCount)->create();
+        $customers = Customer::factory()->count($this->customerCount - 1)->create();
 
         // create customers
         $suppliers = Supplier::factory()->count($this->supplierCount)->create();
@@ -65,7 +68,7 @@ class DatabaseSeeder extends Seeder
         // foreach sale create some purchase items
         $purchase_items = $purchases->map(function($purchase) use ($products) {
             return PurchaseItem::factory()->count($this->generateItemCount())->sequence(function ($sequence) use ($purchase, $products) {
-                $product = $products->random();
+                $product = $products->where('stockable', 'Y')->where('purchasable', 'Y')->random();
 
                 return [
                     'purchase_id' => $purchase->id,

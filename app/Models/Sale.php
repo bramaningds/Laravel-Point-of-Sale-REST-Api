@@ -45,18 +45,14 @@ class Sale extends Model
 
     public function scopeSearch(Builder $query, string $keyword)
     {
-        $sale_ids = Sale::query()->selectRaw('DISTINCT(sales.id) as id')
-            ->join('users', 'users.id', '=', 'user_id')
-            ->join('customers', 'customers.id', '=', 'customer_id')
-            ->join('sale_items', 'sales.id', '=', 'sale_items.sale_id')
-            ->join('products', 'products.id', '=', 'sale_items.product_id')
-            ->whereRaw('FALSE')
-            ->orWhere('users.name', 'like', "%{$keyword}%")
-            ->orWhere('customers.name', 'like', "%{$keyword}%")
-            ->orWhere('products.name', 'like', "%{$keyword}%")
-            ->pluck('id');
-
-        $query->whereIn('id', $sale_ids);
+        $query->select('sales.*')
+            ->join('users as scope_search__users', 'scope_search__users.id', 'sales.user_id')
+            ->join('customers as scope_search__customers', 'scope_search__customers.id', 'sales.customer_id')
+            ->join('sale_items as scope_search__sale_items', 'scope_search__sale_items.sale_id', 'sales.id')
+            ->join('products as scope_search__products', 'scope_search__products.id', 'scope_search__sale_items.product_id')
+            ->orWhere('scope_search__users.name', 'like', "%{$keyword}%")
+            ->orWhere('scope_search__customers.name', 'like', "%{$keyword}%")
+            ->orWhere('scope_search__products.name', 'like', "%{$keyword}%");
     }
 
     public function scopeOfUser(Builder $query, string $user_id)
@@ -79,24 +75,16 @@ class Sale extends Model
 
     public function scopeOfProduct(Builder $query, string $product_id)
     {
-        $sale_ids = Sale::query()->selectRaw('sales.id as id')
-            ->join('sale_items', 'sales.id', '=', 'sale_items.sale_id')
-            ->where('sale_items.product_id', $product_id)
-            ->pluck('id')
-            ->toArray();
-
-        $query->whereIn('id', $sale_ids);
+        $query->select('sales.*')
+            ->join('sale_items as scope_product__sale_items', 'scope_product__sale_items.sale_id', '=', 'sales.id')
+            ->where('scope_product__sale_items.product_id', $product_id);
     }
 
     public function scopeOfCategory(Builder $query, string $category_id)
     {
-        $sale_ids = Sale::query()->selectRaw('sales.id as id')
-            ->join('sale_items', 'sales.id', '=', 'sale_items.sale_id')
-            ->join('products', 'products.id', '=', 'sale_items.product_id')
-            ->whereIn('products.category_id', $category_id)
-            ->pluck('id')
-            ->toArray();
-
-        $query->whereIn('id', $sale_ids);
+        $query->select('sales.*')
+            ->join('sale_items as scope_category__sale_items', 'scope_category__sale_items.sale_id', '=', 'sales.id')
+            ->join('products as scope_category__products', 'scope_category__products.id', '=', 'sale_items.product_id')
+            ->where('scope_category__products.category_id', $category_id);
     }
 }

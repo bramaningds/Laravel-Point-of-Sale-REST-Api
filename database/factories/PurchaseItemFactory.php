@@ -30,8 +30,8 @@ class PurchaseItemFactory extends Factory
             $purchase_item->product->increment('stock', $purchase_item->quantity);
             $purchase_item->product->mutations()->create([
                 'mutation_type' => 'purchase.store',
-                'debet' => 0,
-                'credit' => $purchase_item->quantity,
+                'debet' => $purchase_item->quantity,
+                'credit' => 0,
                 'balance' => $purchase_item->product->stock
             ]);
         });

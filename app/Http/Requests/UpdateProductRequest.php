@@ -25,7 +25,8 @@ class UpdateProductRequest extends FormRequest
             'name' => 'string',
             'description' => 'string',
             'price' => 'numeric',
-            'category_id' => 'numeric',
+            'stock' => 'numeric',
+            'category_id' => 'numeric|exists:categories,id',
             'sellable' => 'in:Y,N',
             'purchasable' => 'in:Y,N',
 

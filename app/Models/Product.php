@@ -54,14 +54,14 @@ class Product extends Model
         $query->where('category_id', $category_id);
     }
 
-    public function isSellable(): bool
+    public function isStockable(): bool
     {
-        return $this->sellable == 'Y';
+        return $this->stockable == 'Y';
     }
 
-    public function isNotSellable(): bool
+    public function isNotStockable(): bool
     {
-        return !$this->isSellable();
+        return ! $this->isStockable();
     }
 
     public function hasSufficientStock($required = 0): bool
@@ -74,6 +74,16 @@ class Product extends Model
         return !$this->hasSufficientStock($required);
     }
 
+    public function isSellable(): bool
+    {
+        return $this->sellable == 'Y';
+    }
+
+    public function isNotSellable(): bool
+    {
+        return ! $this->isSellable();
+    }
+
     public function isPurchasable(): bool
     {
         return $this->purchasable == 'Y';
@@ -81,7 +91,6 @@ class Product extends Model
 
     public function isNotPurchasable(): bool
     {
-        return !$this->isPurchasable();
+        return ! $this->isPurchasable();
     }
-
 }

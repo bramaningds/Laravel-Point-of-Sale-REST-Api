@@ -18,6 +18,9 @@ class SupplierFactory extends Factory
     {
         return [
             'name' => fake()->name(),
+            'phone' => fake()->phoneNumber(),
+            'email' => fake()->email(),
+            'address' => fake()->address(),
             'created_at' => fake()->dateTimeThisMonth(),
         ];
     }

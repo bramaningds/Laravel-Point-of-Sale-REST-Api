@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ProductMutationController;
 use App\Http\Controllers\Api\SaleController;
 use App\Http\Controllers\Api\SaleItemController;
 use App\Http\Controllers\Api\SupplierController;
@@ -30,3 +31,5 @@ Route::apiResource('/sale.item'     , SaleItemController::class);
 Route::apiResource('/supplier'      , SupplierController::class);
 Route::apiResource('/purchase'      , PurchaseController::class);
 Route::apiResource('/purchase.item' , PurchaseItemController::class);
+
+Route::get('/product/{id}/mutation' , ProductMutationController::class);

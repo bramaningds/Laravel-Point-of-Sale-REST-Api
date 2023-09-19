@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
+            $table->unsignedinteger('category_id');
             $table->string('name', 100)->unique();
             $table->string('description', 1000)->nullable();
             $table->unsignedDecimal('price', 8, 2);
+            $table->enum('stockable', ['Y', 'N']);
             $table->unsignedDecimal('stock', 8, 2);
-            $table->unsignedinteger('category_id');
             $table->enum('sellable', ['Y', 'N']);
             $table->enum('purchasable', ['Y', 'N']);
             $table->timestamps();

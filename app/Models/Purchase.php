@@ -31,35 +31,28 @@ class Purchase extends Model
     {
         return $this->belongsToMany(Product::class, 'purchase_items')
             ->using(PurchaseItem::class)
+            ->withTimestamps()
             ->withPivot('quantity', 'price')
-            ->withTimestamps();
+            ->wherePivotNull('deleted_at');
     }
 
     public function getTotalAttribute(): Float
     {
-        $items = $this->items->toArray() ?: [];
-
-        $subtotal = array_reduce($items, function ($carry, $item) {
-            return $carry + ($item['pivot']['quantity'] * $item['pivot']['price']);
-        }, 0);
-
-        $total = $subtotal;
-
-        return $total;
+        return array_reduce($this->items?->toArray() ?? [], function ($total, $item) {
+            return ($total ?? 0) + ($item['pivot']['quantity'] * $item['pivot']['price']);
+        });
     }
 
     public function scopeSearch(Builder $query, string $keyword)
     {
-        $query->whereIn('id', Purchase::query()->selectRaw('DISTINCT(purchases.id) as id')
-                ->join('users', 'users.id', '=', 'user_id')
-                ->join('suppliers', 'suppliers.id', '=', 'supplier_id')
-                ->join('purchase_items', 'purchases.id', '=', 'purchase_items.purchase_id')
-                ->join('products', 'products.id', '=', 'purchase_items.product_id')
-                ->whereRaw('FALSE')
-                ->orWhere('users.name', 'like', "%{$keyword}%")
-                ->orWhere('suppliers.name', 'like', "%{$keyword}%")
-                ->orWhere('products.name', 'like', "%{$keyword}%")
-                ->pluck('id'));
+        $query->select('purchases.*')
+            ->join('users as scope_search__users', 'scope_search__users.id', 'purchases.user_id')
+            ->join('suppliers as scope_search__suppliers', 'scope_search__suppliers.id', 'purchases.supplier_id')
+            ->join('purchase_items as scope_search__purchase_items', 'scope_search__purchase_items.purchase_id', 'purchases.id')
+            ->join('products as scope_search__products', 'scope_search__products.id', 'scope_search__purchase_items.product_id')
+            ->orWhere('scope_search__users.name', 'like', "%{$keyword}%")
+            ->orWhere('scope_search__suppliers.name', 'like', "%{$keyword}%")
+            ->orWhere('scope_search__products.name', 'like', "%{$keyword}%");
     }
 
     public function scopeOfUser(Builder $query, string $user_id)
@@ -82,11 +75,16 @@ class Purchase extends Model
 
     public function scopeOfProduct(Builder $query, string $product_id)
     {
-        $purchase_ids = Purchase::query()->selectRaw('purchases.id as id')
-            ->join('purchase_items', 'purchases.id', '=', 'purchase_items.purchase_id')
-            ->where('purchase_items.product_id', $product_id)
-            ->pluck('id');
+        $query->select('purchases.*')
+            ->join('purchase_items as scope_product__purchase_items', 'scope_product__purchase_items.purchase_id', '=', 'purchases.id')
+            ->where('scope_product__purchase_items.product_id', $product_id);
+    }
 
-        $query->whereIn('id', $purchase_ids);
+    public function scopeOfCategory(Builder $query, string $category_id)
+    {
+        $query->select('purchases.*')
+            ->join('purchase_items as scope_category__purchase_items', 'scope_category__purchase_items.purchase_id', '=', 'purchases.id')
+            ->join('products as scope_category__products', 'scope_category__products.id', '=', 'purchase_items.product_id')
+            ->where('scope_category__products.category_id', $category_id);
     }
 }

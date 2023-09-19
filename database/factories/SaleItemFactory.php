@@ -28,6 +28,8 @@ class SaleItemFactory extends Factory
         return $this->afterCreating(function (SaleItem $sale_item) {
             $sale_item->load('product');
 
+            if ($sale_item->product->isNotStockable()) return;
+
             // If product stock is lower than quantity then adjust the stock
             if ($sale_item->product->stock < $sale_item->quantity) {
                 $stock_adjsument = $sale_item->quantity * 3;
