@@ -45,14 +45,9 @@ class Purchase extends Model
 
     public function scopeSearch(Builder $query, string $keyword)
     {
-        $query->select('purchases.*')
-            ->join('users as scope_search__users', 'scope_search__users.id', 'purchases.user_id')
-            ->join('suppliers as scope_search__suppliers', 'scope_search__suppliers.id', 'purchases.supplier_id')
-            ->join('purchase_items as scope_search__purchase_items', 'scope_search__purchase_items.purchase_id', 'purchases.id')
-            ->join('products as scope_search__products', 'scope_search__products.id', 'scope_search__purchase_items.product_id')
-            ->orWhere('scope_search__users.name', 'like', "%{$keyword}%")
-            ->orWhere('scope_search__suppliers.name', 'like', "%{$keyword}%")
-            ->orWhere('scope_search__products.name', 'like', "%{$keyword}%");
+        $query->orWhereRelation('user', fn($query) => $query->where('name', 'like', "%{$keyword}%"))
+            ->orWhereRelation('supplier', fn($query) => $query->where('name', 'like', "%{$keyword}%"))
+            ->orWhereRelation('items', fn($query) => $query->where('name', 'like', "%{$keyword}%"));
     }
 
     public function scopeOfUser(Builder $query, string $user_id)
@@ -75,16 +70,11 @@ class Purchase extends Model
 
     public function scopeOfProduct(Builder $query, string $product_id)
     {
-        $query->select('purchases.*')
-            ->join('purchase_items as scope_product__purchase_items', 'scope_product__purchase_items.purchase_id', '=', 'purchases.id')
-            ->where('scope_product__purchase_items.product_id', $product_id);
+        $query->whereRelation('product', 'product_id', $product_id);
     }
 
     public function scopeOfCategory(Builder $query, string $category_id)
     {
-        $query->select('purchases.*')
-            ->join('purchase_items as scope_category__purchase_items', 'scope_category__purchase_items.purchase_id', '=', 'purchases.id')
-            ->join('products as scope_category__products', 'scope_category__products.id', '=', 'purchase_items.product_id')
-            ->where('scope_category__products.category_id', $category_id);
+        $query->whereRelation('product', 'category_id', $category_id);
     }
 }

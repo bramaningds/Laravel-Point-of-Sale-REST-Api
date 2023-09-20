@@ -39,6 +39,7 @@ class ProductFactory extends Factory
     {
         return $this->afterCreating(function (Product $product) {
             if ($product->isNotStockable()) return;
+            if ($product->stock != 0) return;
 
             $product->increment('stock', 10);
 

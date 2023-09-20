@@ -52,8 +52,8 @@ class PurchaseTest extends TestCase
     public function test_store(): void
     {
         $user = User::factory()->create();
-        $supplier = Supplier::factory()->sequence(fn() => ['name' => 'bram'])->create();
-        $products = Product::factory()->count(3)->for(Category::factory())->sequence(fn() => ['purchasable' => 'Y', 'stock' => 10])->create();
+        $supplier = Supplier::factory()->create();
+        $products = Product::factory()->count(3)->for(Category::factory())->sequence(fn() => ['stockable' => 'Y', 'purchasable' => 'Y', 'stock' => 10])->create();
 
         $response = $this->postJson('/api/purchase', [
             'user_id' => $user->id,
