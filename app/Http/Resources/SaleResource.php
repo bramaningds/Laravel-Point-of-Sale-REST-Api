@@ -20,6 +20,9 @@ class SaleResource extends JsonResource
             'user' => UserResource::make($this->whenLoaded('user')),
             'customer' => CustomerResource::make($this->whenLoaded('customer')),
             'items' => ItemResource::collection($this->whenLoaded('items')),
+            'discount' => $this->discount,
+            'tax' => $this->tax,
+            'promo' => $this->promo,
             'total' => $this->total,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at

@@ -22,7 +22,7 @@ class ProductFactory extends Factory
 
         $stockable = fake()->randomElement($yn);
         $sellable = fake()->randomElement($yn);
-        $purchasable = $stockable == 'Y' ? fake()->randomElement($yn) : 'N';
+        $purchasable = $stockable;
 
         return [
             'name' => fake()->unique()->words(fake()->numberBetween(2, 10), true),
@@ -33,23 +33,6 @@ class ProductFactory extends Factory
             'sellable' => $sellable,
             'purchasable' => $purchasable,
         ];
-    }
-
-    public function configure(): static
-    {
-        return $this->afterCreating(function (Product $product) {
-            if ($product->isNotStockable()) return;
-            if ($product->stock != 0) return;
-
-            $product->increment('stock', 10);
-
-            $product->mutations()->create([
-                'mutation_type' => 'adjustment',
-                'debet' => 10,
-                'credit' => 0,
-                'balance' => 10,
-            ]);
-        });
     }
 
 }

@@ -17,8 +17,6 @@ return new class extends Migration
             $table->unsignedInteger('product_id');
             $table->unsignedfloat('quantity');
             $table->unsignedfloat('price');
-            $table->timestamps();
-            $table->softDeletes();
             $table->index(['sale_id', 'product_id']);
         });
     }

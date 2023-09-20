@@ -18,7 +18,7 @@ class SaleItem extends Pivot
         'quantity', 'price', 'deleted_at',
     ];
 
-    public $timestamps = true;
+    public $timestamps = false;
 
     public function sale()
     {

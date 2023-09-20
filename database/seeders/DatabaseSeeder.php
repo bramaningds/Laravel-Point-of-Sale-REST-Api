@@ -74,13 +74,11 @@ class DatabaseSeeder extends Seeder
                     'purchase_id' => $purchase->id,
                     'product_id' => $product->id,
                     'price' => $product->price,
-                    'created_at' => $purchase->created_at,
-                    'updated_at' => $purchase->created_at,
                 ];
 
             })->create();
         });
-
+        return;
         // create sales
         $sales = Sale::factory()->count($this->saleCount)->sequence(function ($sequence) use ($users, $customers) {
             return [
@@ -92,13 +90,15 @@ class DatabaseSeeder extends Seeder
         // create sale_items
         $sale_items = $sales->map(function($sale) use ($products) {
             return SaleItem::factory()->count($this->generateItemCount())->sequence(function ($sequence) use ($sale, $products) {
-                $product = $products->random();
+                $quantity = fake()->numberBetween(1, 5);
+                $product = $products->filter(fn($product) => $product->sellable == 'Y' && ($product->stockable == 'N' || $product->stock > $quantity))->random();
+                $price = $product->price + fake()->randomElement([-5, -1, 0, 2, 3]) * 500;
+
                 return [
                     'sale_id' => $sale->id,
                     'product_id' => $product->id,
-                    'price' => $product->price,
-                    'created_at' => $sale->created_at,
-                    'updated_at' => $sale->created_at,
+                    'quantity' => $quantity,
+                    'price' => $price,
                 ];
             })->create();
         });

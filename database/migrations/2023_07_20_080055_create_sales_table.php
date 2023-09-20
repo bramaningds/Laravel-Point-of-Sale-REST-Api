@@ -15,6 +15,9 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->unsignedInteger('user_id');
             $table->unsignedInteger('customer_id');
+            $table->unsignedfloat('discount')->nullable()->default(0);
+            $table->unsignedfloat('promo')->nullable()->default(0);
+            $table->unsignedfloat('tax')->nullable()->default(0);
             $table->timestamps();
             $table->softDeletes();
             $table->index(['user_id', 'customer_id', 'created_at', 'deleted_at']);

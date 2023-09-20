@@ -32,15 +32,16 @@ class Sale extends Model
         return $this->belongsToMany(Product::class, 'sale_items')
             ->using(SaleItem::class)
             ->withTimestamps()
-            ->withPivot('quantity', 'price', 'sale_items.id as sale_items_id')
-            ->wherePivotNull('deleted_at');
+            ->withPivot('quantity', 'price', 'sale_items.id as sale_items_id');
     }
 
     public function getTotalAttribute(): Float
     {
-        return array_reduce($this->items?->toArray() ?? [], function ($total, $item) {
+        $sub_total = array_reduce($this->items?->toArray() ?? [], function ($total, $item) {
             return ($total ?? 0) + ($item['pivot']['quantity'] * $item['pivot']['price']);
         });
+
+        return (1 + $this->tax / 100) * (((1 - $this->discount / 100) * $sub_total) - $this->promo);
     }
 
     public function scopeSearch(Builder $query, string $keyword)

@@ -18,7 +18,7 @@ class PurchaseItemFactory extends Factory
     public function definition(): array
     {
         return [
-            'quantity' => fake()->numberBetween(1, 5),
+            'quantity' => fake()->numberBetween(1, 3),
             'price' => 500 * fake()->numberBetween(10, 50),
         ];
     }
@@ -26,17 +26,11 @@ class PurchaseItemFactory extends Factory
     public function configure(): static
     {
         return $this->afterCreating(function (PurchaseItem $purchase_item) {
+            // Load the product relation
             $purchase_item->load('product');
 
+            // Increase the stock
             $purchase_item->product->increment('stock', $purchase_item->quantity);
-
-            $purchase_item->product->mutations()->create([
-                'mutation_type' => 'purchase.store',
-                'reference_id' => $purchase_item->purchase_id,
-                'debet' => $purchase_item->quantity,
-                'credit' => 0,
-                'balance' => $purchase_item->product->stock
-            ]);
         });
     }
 }
