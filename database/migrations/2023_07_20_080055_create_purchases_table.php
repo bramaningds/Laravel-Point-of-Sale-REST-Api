@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('purchases', function (Blueprint $table) {
             $table->id();
-            $table->unsignedinteger('user_id');
-            $table->unsignedinteger('supplier_id');
+            $table->unsignedInteger('user_id');
+            $table->unsignedInteger('supplier_id');
             $table->timestamps();
             $table->softDeletes();
             $table->index(['user_id', 'supplier_id', 'created_at']);

@@ -27,9 +27,12 @@ class PurchaseItemFactory extends Factory
     {
         return $this->afterCreating(function (PurchaseItem $purchase_item) {
             $purchase_item->load('product');
+
             $purchase_item->product->increment('stock', $purchase_item->quantity);
+
             $purchase_item->product->mutations()->create([
                 'mutation_type' => 'purchase.store',
+                'reference_id' => $purchase_item->purchase_id,
                 'debet' => $purchase_item->quantity,
                 'credit' => 0,
                 'balance' => $purchase_item->product->stock

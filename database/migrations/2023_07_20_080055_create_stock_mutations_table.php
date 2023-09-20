@@ -12,8 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('stock_mutations', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedinteger('product_id');
+            $table->bigIncrements('id');
+            $table->unsignedInteger('product_id');
+            $table->unsignedBigInteger('reference_id')->nullable();
             $table->timestamp('mutation_timestamp');
             $table->enum('mutation_type', ['sale.store','sale.update','sale.delete','purchase.store','purchase.update','purchase.delete','adjustment']);
             $table->unsignedDecimal('debet', 8, 2);

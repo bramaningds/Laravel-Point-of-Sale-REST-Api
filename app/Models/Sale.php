@@ -32,7 +32,7 @@ class Sale extends Model
         return $this->belongsToMany(Product::class, 'sale_items')
             ->using(SaleItem::class)
             ->withTimestamps()
-            ->withPivot('quantity', 'price')
+            ->withPivot('quantity', 'price', 'sale_items.id as sale_items_id')
             ->wherePivotNull('deleted_at');
     }
 

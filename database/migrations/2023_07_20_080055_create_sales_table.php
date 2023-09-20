@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('sales', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedinteger('user_id');
-            $table->unsignedinteger('customer_id');
+            $table->bigIncrements('id');
+            $table->unsignedInteger('user_id');
+            $table->unsignedInteger('customer_id');
             $table->timestamps();
             $table->softDeletes();
             $table->index(['user_id', 'customer_id', 'created_at', 'deleted_at']);
