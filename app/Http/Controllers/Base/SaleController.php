@@ -102,6 +102,8 @@ class SaleController extends Controller
             $sale->user()->associate($user);
             // Set the customer
             $sale->customer()->associate($customer);
+            // Fill attributes
+            $sale->fill($request->only(['discount', 'promo', 'tax']));
             // Save the sale
             $sale->save();
             // Set the sale items

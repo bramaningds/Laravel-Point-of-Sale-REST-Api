@@ -84,8 +84,6 @@ class PurchaseController extends Controller
             $items = array_reduce($request->input('items'), function($items, $item) {
                 // Find the product
                 $product = Product::find($item['id']);
-                // Throw if product is not sellable
-                if ($product->isNotPurchasable()) throw new ProductIsNotSellableException($product);
                 // Decrement product items stock
                 $product->decrement('stock', $item['quantity']);
                 // Set the item as in forms of attaching item requirement
@@ -93,7 +91,6 @@ class PurchaseController extends Controller
                     'quantity' => $item['quantity'],
                     'price' => $item['price'] ?? $product->price
                 ];
-
                 return $items;
             }, []);
 
@@ -103,6 +100,8 @@ class PurchaseController extends Controller
             $purchase->user()->associate($user);
             // Set the supplier
             $purchase->supplier()->associate($supplier);
+            // Fill attributes
+            $purchase->fill($request->only(['discount', 'promo', 'tax']));
             // Save the purchase
             $purchase->save();
             // Set the purchase items

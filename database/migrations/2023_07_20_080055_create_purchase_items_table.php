@@ -17,7 +17,8 @@ return new class extends Migration
             $table->unsignedInteger('product_id');
             $table->unsignedfloat('quantity');
             $table->unsignedfloat('price');
-            $table->index(['purchase_id', 'product_id']);
+            $table->index('purchase_id');
+            $table->index('product_id');
         });
     }
 

@@ -30,11 +30,21 @@ class StorePurchaseRequest extends FormRequest
             'supplier.phone' => 'string',
             'supplier.email' => 'string',
             'supplier.address' => 'string',
+            'discount' => 'numeric',
+            'promo' => 'numeric',
+            'tax' => 'numeric',
             'items' => 'required',
             'items.*.id' => 'required|numeric|exists:products',
             'items.*.quantity' => 'required|numeric',
             'items.*.price' => 'numeric',
         ];
+    }
+
+    protected function passedValidation(): void
+    {
+        $this->mergeIfMissing([
+            'discount' => 0, 'promo' => 0, 'tax' => 0,
+        ]);
     }
 
     public function after(): array

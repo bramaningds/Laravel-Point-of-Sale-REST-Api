@@ -20,7 +20,9 @@ return new class extends Migration
             $table->unsignedfloat('tax')->nullable()->default(0);
             $table->timestamps();
             $table->softDeletes();
-            $table->index(['user_id', 'supplier_id', 'created_at']);
+            $table->index('user_id');
+            $table->index('supplier_id');
+            $table->index('created_at');
         });
     }
 

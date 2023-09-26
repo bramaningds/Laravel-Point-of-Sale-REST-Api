@@ -6,11 +6,10 @@ use App\Models\Product;
 use App\Models\Purchase;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Pivot;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PurchaseItem extends Pivot
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $table = 'purchase_items';
 

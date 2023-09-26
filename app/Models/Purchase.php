@@ -14,7 +14,7 @@ class Purchase extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'user_id', 'supplier_id',
+        'discount', 'promo', 'tax'
     ];
 
     public function supplier(): BelongsTo
@@ -31,17 +31,23 @@ class Purchase extends Model
     {
         return $this->belongsToMany(Product::class, 'purchase_items')
             ->using(PurchaseItem::class)
-            ->withTimestamps()
             ->withPivot('quantity', 'price');
     }
 
     public function getTotalAttribute(): Float
     {
-        $sub_total = array_reduce($this->items?->toArray() ?? [], function ($total, $item) {
+        // Calculate total of items
+        $total = array_reduce($this->items?->toArray() ?? [], function ($total, $item) {
             return ($total ?? 0) + ($item['pivot']['quantity'] * $item['pivot']['price']);
         });
-
-        return (1 + $this->tax / 100) * (((1 - $this->discount / 100) * $sub_total) - $this->promo);
+        // Calculate the discount
+        $total = $total - $total * $this->discount / 100;
+        // Calculate promo
+        $total = $total - $this->promo;
+        // Calculate the tax
+        $total = $total + $total * $this->tax / 100;
+        
+        return $total;
     }
 
     public function scopeSearch(Builder $query, string $keyword)

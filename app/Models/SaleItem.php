@@ -6,16 +6,15 @@ use App\Models\Product;
 use App\Models\Sale;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Pivot;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SaleItem extends Pivot
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $table = 'sale_items';
 
     protected $fillable = [
-        'quantity', 'price', 'deleted_at',
+        'quantity', 'price',
     ];
 
     public $timestamps = false;

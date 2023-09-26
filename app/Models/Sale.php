@@ -14,7 +14,7 @@ class Sale extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'user_id', 'customer_id',
+        'discount', 'promo', 'tax',
     ];
 
     public function customer(): BelongsTo
@@ -31,8 +31,7 @@ class Sale extends Model
     {
         return $this->belongsToMany(Product::class, 'sale_items')
             ->using(SaleItem::class)
-            ->withTimestamps()
-            ->withPivot('quantity', 'price', 'sale_items.id as sale_items_id');
+            ->withPivot('quantity', 'price');
     }
 
     public function getTotalAttribute(): Float
