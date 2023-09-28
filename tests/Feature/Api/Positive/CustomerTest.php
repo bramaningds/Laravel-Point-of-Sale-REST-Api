@@ -3,12 +3,10 @@
 namespace Tests\Feature\Api\Positive;
 
 use App\Models\Customer;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class CustomerTest extends TestCase
 {
-    use RefreshDatabase;
 
     public function test_index(): void
     {

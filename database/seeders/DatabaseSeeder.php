@@ -2,6 +2,14 @@
 
 namespace Database\Seeders;
 
+use App\Models\Customer;
+use App\Models\Product;
+use App\Models\Purchase;
+use App\Models\PurchaseItem;
+use App\Models\Sale;
+use App\Models\SaleItem;
+use App\Models\Supplier;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -24,11 +32,27 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             SupplierSeeder::class,
             CustomerSeeder::class,
+        ]);
+
+        $this->call([
             PurchaseSeeder::class,
             SaleSeeder::class,
         ]);
 
         return;
+
+        $users = User::all();
+        $customers = Customer::all();
+        $suppliers = Supplier::all();
+        $products = Product::all();
+
+        // create sales
+        $purchases = Purchase::factory()->count(100)->sequence(function ($sequence) use ($users, $suppliers) {
+            return [
+                'user_id' => $users->random()->id,
+                'supplier_id' => $suppliers->random()->id,
+            ];
+        })->create();
 
         // foreach sale create some purchase items
         $purchase_items = $purchases->map(function ($purchase) use ($products) {
@@ -46,7 +70,7 @@ class DatabaseSeeder extends Seeder
         });
 
         // create sales
-        $sales = Sale::factory()->count($this->saleCount)->sequence(function ($sequence) use ($users, $customers) {
+        $sales = Sale::factory()->count(100)->sequence(function ($sequence) use ($users, $customers) {
             return [
                 'user_id' => $users->random()->id,
                 'customer_id' => $customers->random()->id,

@@ -2,19 +2,15 @@
 
 namespace Tests\Feature\Api\Positive;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-use Tests\TestCase;
-
 use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\User;
+use Tests\TestCase;
 
 class SaleTest extends TestCase
 {
-    use RefreshDatabase;
 
     /**
      * A basic feature test example.
@@ -37,10 +33,10 @@ class SaleTest extends TestCase
         $products = Product::factory()->count(3)->for(Category::factory())->create();
 
         $sale = Sale::factory()
-                    ->for($user)
-                    ->for($customer)
-                    ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
-                    ->create();
+            ->for($user)
+            ->for($customer)
+            ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
+            ->create();
 
         $response = $this->get('/api/sale?keyword=bram');
 
@@ -64,8 +60,8 @@ class SaleTest extends TestCase
             'items' => $products->map(fn($product) => [
                 'id' => $product->id,
                 'quantity' => 2,
-                'price' => $product->price
-            ])
+                'price' => $product->price,
+            ]),
         ]);
 
         $response->assertStatus(201);
@@ -80,7 +76,7 @@ class SaleTest extends TestCase
         $this->assertDatabaseHas('sale_items', ['product_id' => $products[0]->id]);
         $this->assertDatabaseCount('sale_items', 3);
 
-        $products->each(function($product) {
+        $products->each(function ($product) {
             $this->assertDatabaseHas('products', ['id' => $product->id, 'stock' => 8]);
         });
     }
@@ -91,10 +87,10 @@ class SaleTest extends TestCase
         $customer = Customer::factory()->sequence(fn() => ['name' => 'bram'])->create();
         $products = Product::factory()->count(3)->for(Category::factory())->create();
         $sale = Sale::factory()
-                    ->for($user)
-                    ->for($customer)
-                    ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
-                    ->create();
+            ->for($user)
+            ->for($customer)
+            ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
+            ->create();
 
         $response = $this->get("/api/sale/{$sale->id}");
 
@@ -112,10 +108,10 @@ class SaleTest extends TestCase
         $customer = Customer::factory()->create();
         $products = Product::factory()->count(3)->for(Category::factory())->create();
         $sale = Sale::factory()
-                    ->for($user)
-                    ->for($customer)
-                    ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
-                    ->create();
+            ->for($user)
+            ->for($customer)
+            ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
+            ->create();
 
         $other_customer = Customer::factory()->create();
 
@@ -139,10 +135,10 @@ class SaleTest extends TestCase
         $customer = Customer::factory()->create();
         $products = Product::factory()->count(3)->for(Category::factory())->create();
         $sale = Sale::factory()
-                    ->for($user)
-                    ->for($customer)
-                    ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
-                    ->create();
+            ->for($user)
+            ->for($customer)
+            ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
+            ->create();
 
         $response = $this->delete("/api/sale/{$sale->id}");
 
@@ -150,7 +146,7 @@ class SaleTest extends TestCase
 
         $this->assertSoftDeleted($sale);
 
-        $products->each(function($product) {
+        $products->each(function ($product) {
             $this->assertDatabaseHas('products', ['id' => $product->id, 'stock' => $product->stock + 1]);
         });
     }

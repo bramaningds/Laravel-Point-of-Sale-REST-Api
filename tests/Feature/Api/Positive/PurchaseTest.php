@@ -2,19 +2,15 @@
 
 namespace Tests\Feature\Api\Positive;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-use Tests\TestCase;
-
 use App\Models\Category;
-use App\Models\Supplier;
 use App\Models\Product;
 use App\Models\Purchase;
+use App\Models\Supplier;
 use App\Models\User;
+use Tests\TestCase;
 
 class PurchaseTest extends TestCase
 {
-    use RefreshDatabase;
 
     public function test_index(): void
     {
@@ -34,10 +30,10 @@ class PurchaseTest extends TestCase
         $products = Product::factory()->count(3)->for(Category::factory())->create();
 
         $purchase = Purchase::factory()
-                    ->for($user)
-                    ->for($supplier)
-                    ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
-                    ->create();
+            ->for($user)
+            ->for($supplier)
+            ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
+            ->create();
 
         $response = $this->get('/api/purchase?keyword=bram');
 
@@ -61,8 +57,8 @@ class PurchaseTest extends TestCase
             'items' => $products->map(fn($product) => [
                 'id' => $product->id,
                 'quantity' => 2,
-                'price' => $product->price
-            ])
+                'price' => $product->price,
+            ]),
         ]);
 
         $response->assertStatus(201);
@@ -77,7 +73,7 @@ class PurchaseTest extends TestCase
         $this->assertDatabaseHas('purchase_items', ['product_id' => $products[0]->id]);
         $this->assertDatabaseCount('purchase_items', 3);
 
-        $products->each(function($product) {
+        $products->each(function ($product) {
             $this->assertDatabaseHas('products', ['id' => $product->id, 'stock' => 8]);
         });
     }
@@ -88,10 +84,10 @@ class PurchaseTest extends TestCase
         $supplier = Supplier::factory()->sequence(fn() => ['name' => 'bram'])->create();
         $products = Product::factory()->count(3)->for(Category::factory())->create();
         $purchase = Purchase::factory()
-                    ->for($user)
-                    ->for($supplier)
-                    ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
-                    ->create();
+            ->for($user)
+            ->for($supplier)
+            ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
+            ->create();
 
         $response = $this->get("/api/purchase/{$purchase->id}");
 
@@ -109,10 +105,10 @@ class PurchaseTest extends TestCase
         $supplier = Supplier::factory()->create();
         $products = Product::factory()->count(3)->for(Category::factory())->create();
         $purchase = Purchase::factory()
-                    ->for($user)
-                    ->for($supplier)
-                    ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
-                    ->create();
+            ->for($user)
+            ->for($supplier)
+            ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
+            ->create();
 
         $other_supplier = Supplier::factory()->create();
 
@@ -136,10 +132,10 @@ class PurchaseTest extends TestCase
         $supplier = Supplier::factory()->create();
         $products = Product::factory()->count(3)->for(Category::factory())->create();
         $purchase = Purchase::factory()
-                    ->for($user)
-                    ->for($supplier)
-                    ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
-                    ->create();
+            ->for($user)
+            ->for($supplier)
+            ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
+            ->create();
 
         $response = $this->delete("/api/purchase/{$purchase->id}");
 
@@ -147,7 +143,7 @@ class PurchaseTest extends TestCase
 
         $this->assertSoftDeleted($purchase);
 
-        $products->each(function($product) {
+        $products->each(function ($product) {
             $this->assertDatabaseHas('products', ['id' => $product->id, 'stock' => $product->stock + 1]);
         });
     }

@@ -3,21 +3,22 @@
 namespace Tests\Feature\Api\Positive;
 
 use App\Models\Category;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class CategoryTest extends TestCase
 {
-    use RefreshDatabase;
 
     public function test_index(): void
     {
+        $category = Category::factory()->create();
+
         $response = $this->get('/api/category');
 
         $response->assertStatus(200);
-        $response->assertJson(function ($json) {
+        $response->assertJson(function ($json) use ($category) {
             $json->hasAll(['meta', 'data', 'links']);
-            $json->has('data', 0);
+            $json->has('data', 1);
+            $json->where('data.0.name', $category->name);
         });
     }
 
@@ -28,19 +29,16 @@ class CategoryTest extends TestCase
         $response = $this->get('/api/category?keyword=bram');
 
         $response->assertStatus(200);
-        $response->assertJson(function ($json) {
+        $response->assertJson(function ($json) use ($category) {
             $json->hasAll(['meta', 'data', 'links']);
             $json->has('data', 1);
+            $json->where('data.0.name', $category->name);
         });
-
-        $category->forceDelete();
     }
 
     public function test_store(): void
     {
-        $response = $this->postJson('/api/category', [
-            'name' => 'bram',
-        ]);
+        $response = $this->postJson('/api/category', ['name' => 'bram']);
 
         $response->assertStatus(201);
         $response->assertJson(function ($json) {
@@ -50,7 +48,7 @@ class CategoryTest extends TestCase
         });
 
         $this->assertDatabaseHas('categories', ['name' => 'bram']);
-        $this->assertModelExists(Category::where('name', 'bram')->first(['id']));
+        $this->assertModelExists(Category::where('name', 'bram')->first());
     }
 
     public function test_show(): void
@@ -71,9 +69,7 @@ class CategoryTest extends TestCase
     {
         $category = Category::factory()->create();
 
-        $response = $this->putJson("/api/category/{$category->id}", [
-            'name' => 'bram',
-        ]);
+        $response = $this->putJson("/api/category/{$category->id}", ['name' => 'bram']);
 
         $response->assertStatus(200);
         $response->assertJson(function ($json) use ($category) {

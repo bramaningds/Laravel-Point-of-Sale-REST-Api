@@ -22,7 +22,7 @@ class SaleSeeder extends Seeder
         $customers = Customer::pluck('id');
         $products = Product::where('sellable', 'Y')->get();
 
-        foreach (array_chunk($this->generateDateTimes(), 5000) as $date_times) {
+        foreach (array_chunk($this->generateDateTimes(), 1000) as $date_times) {
             DB::table('sales')->insert(array_map(function ($date_time) use ($users, $customers) {
                 return [
                     'user_id' => $users->random(),

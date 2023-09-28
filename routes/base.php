@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Http\Request;
 use App\Http\Controllers\Base\CategoryController;
 use App\Http\Controllers\Base\CustomerController;
 use App\Http\Controllers\Base\ProductController;

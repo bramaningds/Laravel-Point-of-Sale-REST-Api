@@ -2,12 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\Supplier;
 use App\Models\Product;
 use App\Models\Purchase;
+use App\Models\Supplier;
 use App\Models\User;
 use DateInterval;
-use DateTime;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -29,8 +28,8 @@ class PurchaseSeeder extends Seeder
         $suppliers = Supplier::pluck('id');
         $products = Product::where('stockable', 'Y')->where('purchasable', 'Y')->get();
 
-        $purchase_items_chunks = array_map(function($date_times) use ($users, $suppliers) {
-            return array_map(function($date_time) use ($users, $suppliers) {
+        $purchase_items_chunks = array_map(function ($date_times) use ($users, $suppliers) {
+            return array_map(function ($date_time) use ($users, $suppliers) {
                 return [
                     'user_id' => $users->random(),
                     'supplier_id' => $suppliers->random(),
@@ -43,7 +42,11 @@ class PurchaseSeeder extends Seeder
             }, $date_times);
         }, array_chunk($date_times, 5000));
 
-        foreach ($purchase_items_chunks as $purchase_items) DB::table('purchases')->insert($purchase_items);
+        foreach ($purchase_items_chunks as $purchase_items) {
+            if (fake()->randomElement([true, false, false])) {
+                DB::table('purchases')->insert($purchase_items);
+            }
+        }
 
         foreach (array_chunk(Purchase::doesntHave('items')->pluck('id')->toArray(), 1000) as $purchase_ids) {
             foreach (range(1, rand(1, 5)) as $count) {

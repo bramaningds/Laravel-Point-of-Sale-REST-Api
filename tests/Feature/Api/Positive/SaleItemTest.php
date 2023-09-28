@@ -2,19 +2,15 @@
 
 namespace Tests\Feature\Api\Positive;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-use Tests\TestCase;
-
 use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\User;
+use Tests\TestCase;
 
 class SaleItemTest extends TestCase
 {
-    use RefreshDatabase;
 
     public function test_index(): void
     {
@@ -23,10 +19,10 @@ class SaleItemTest extends TestCase
         $products = Product::factory()->count(3)->for(Category::factory())->create();
 
         $sale = Sale::factory()
-                    ->for($user)
-                    ->for($customer)
-                    ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
-                    ->create();
+            ->for($user)
+            ->for($customer)
+            ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
+            ->create();
 
         $response = $this->get("/api/sale/{$sale->id}/item");
 
@@ -43,10 +39,10 @@ class SaleItemTest extends TestCase
         $products = Product::factory()->count(3)->for(Category::factory())->create();
 
         $sale = Sale::factory()
-                    ->for($user)
-                    ->for($customer)
-                    ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
-                    ->create();
+            ->for($user)
+            ->for($customer)
+            ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
+            ->create();
 
         $response = $this->get('/api/sale?keyword=bram');
 
@@ -65,16 +61,16 @@ class SaleItemTest extends TestCase
         $products = Product::factory()->count(2)->for(Category::factory())->sequence(fn() => ['sellable' => 'Y', 'stock' => 10])->create();
 
         $sale = Sale::factory()
-                    ->for($user)
-                    ->for($customer)
-                    ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
-                    ->create();
+            ->for($user)
+            ->for($customer)
+            ->hasAttached($products, ['quantity' => 1, 'price' => 10000], 'items')
+            ->create();
 
         $product = Product::factory()->sequence(fn() => ['sellable' => 'Y', 'stock' => 10])->for(Category::factory())->create();
 
         $response = $this->postJson("/api/sale/{$sale->id}/item", [
             'id' => $product->id,
-            'quantity' => 2
+            'quantity' => 2,
         ]);
 
         $response->assertStatus(201);

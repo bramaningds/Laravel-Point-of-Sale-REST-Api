@@ -2,16 +2,12 @@
 
 namespace Tests\Feature\Api\Positive;
 
-use Tests\TestCase;
-
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-use App\Models\Product;
 use App\Models\Category;
+use App\Models\Product;
+use Tests\TestCase;
 
 class ProductTest extends TestCase
 {
-    use RefreshDatabase;
 
     public function test_index(): void
     {

@@ -2,15 +2,11 @@
 
 namespace Tests\Feature\Api\Positive;
 
-use Tests\TestCase;
-
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
 use App\Models\Supplier;
+use Tests\TestCase;
 
 class SupplierTest extends TestCase
 {
-    use RefreshDatabase;
     /**
      * A basic feature test example.
      */
